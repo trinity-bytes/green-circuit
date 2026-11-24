@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>App — Tourbench</title>
+    <meta
+      name="description"
+      content="Banco de pruebas del TSP por fuerza bruta: la ruta evaluada, su suma, la mejor encontrada y la matriz de adyacencia en vivo."
+    />
+    <link rel="canonical" href="https://tourbench.jahattrinidad.com/app" />
+    <meta name="theme-color" content="#eff1f5" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Tourbench" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:title" content="App — Tourbench" />
+    <meta
+      property="og:description"
+      content="Banco de pruebas del TSP por fuerza bruta: la ruta evaluada, su suma, la mejor encontrada y la matriz de adyacencia en vivo."
+    />
+    <meta property="og:url" content="https://tourbench.jahattrinidad.com/app" />
+    <meta property="og:image" content="https://tourbench.jahattrinidad.com/assets/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Tourbench evaluando todos los ciclos de un grafo de 8 nodos"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="src/styles/tokens.css" />
+    <link rel="stylesheet" href="src/styles/app.css" />
+    <link rel="stylesheet" href="src/styles/about.css" />
+    <script src="https://unpkg.com/cytoscape@3.35.0/dist/cytoscape.min.js"></script>
+  </head>
+  <body>
+    <div class="small-screen">
+      <svg class="icon" width="24" height="24" aria-hidden="true">
+        <use href="assets/icons.svg#brand-mark"></use>
+      </svg>
+      <h1>Tourbench necesita una pantalla más ancha</h1>
+      <p>
+        El grafo, la matriz y el trace no caben por debajo de 1024 px. Mientras tanto, puedes leer
+        cómo funciona.
+      </p>
+      <a href="./">
+        <svg class="icon" width="16" height="16" aria-hidden="true">
+          <use href="assets/icons.svg#icon-arrow-up-right"></use>
+        </svg>
+        Ver la página del proyecto
+      </a>
+    </div>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <svg class="icon" width="24" height="24" aria-hidden="true">
+            <use href="assets/icons.svg#brand-mark"></use></svg
+          ><strong>Tourbench</strong>
+        </div>
+        <span class="divider"></span><span class="caps">N</span>
+        <div class="stepper">
+          <button id="minus" aria-label="Reducir número de nodos">
+            <svg class="icon" width="16" height="16" aria-hidden="true">
+              <use href="assets/icons.svg#icon-minus"></use>
+            </svg></button
+          ><output id="node-count">8</output
+          ><button id="plus" aria-label="Aumentar número de nodos">
+            <svg class="icon" width="16" height="16" aria-hidden="true">
+              <use href="assets/icons.svg#icon-plus"></use>
+            </svg>
+          </button>
+        </div>
+        <span class="meta mono wide-only">4–11</span><span class="caps wide-only">LAYOUT</span>
+        <div class="segments" id="layouts">
+          <button data-layout="random" class="selected">Aleatorio</button
+          ><button data-layout="circular">Circular</button
+          ><button data-layout="grid">Cuadrícula</button>
+        </div>
+        <button class="icon-button" id="regenerate" aria-label="Regenerar grafo">
+          <svg class="icon" width="16" height="16" aria-hidden="true">
+            <use href="assets/icons.svg#icon-regenerate"></use>
+          </svg></button
+        ><button id="edit">
+          <svg class="icon" width="16" height="16" aria-hidden="true">
+            <use href="assets/icons.svg#icon-pencil"></use>
+          </svg>
+          Editar grafo
+        </button>
+        <div class="grow"></div>
+        <span class="mono wide-only" id="complexity"></span
+        ><button id="restart" hidden>
+          <svg class="icon" width="16" height="16" aria-hidden="true">
+            <use href="assets/icons.svg#icon-regenerate"></use>
+          </svg>
+          Reiniciar</button
+        ><span class="divider"></span
+        ><button type="button" data-about-open>
+          Acerca<span class="wide-only"> del proyecto</span></button
+        ><a
+          href="https://github.com/trinity-bytes/green-circuit"
+          aria-label="Código fuente en GitHub"
+          ><svg class="icon" width="16" height="16" aria-hidden="true">
+            <use href="assets/icons.svg#icon-github"></use></svg
+        ></a>
+      </header>
+      <main class="body">
+        <section class="stage">
+          <div class="canvas">
+            <div class="canvas-meta">
+              <div class="caps" id="instance"></div>
+              <p id="canvas-help">
+                Arrastra un nodo para moverlo · doble clic en una arista para editar su peso
+              </p>
+              <div id="tools" hidden>
+                <button data-tool="select">
+                  <svg class="icon" width="16" height="16" aria-hidden="true">
+                    <use href="assets/icons.svg#icon-cursor"></use>
+                  </svg>
+                  Seleccionar</button
+                ><button data-tool="node">
+                  <svg class="icon" width="16" height="16" aria-hidden="true">
+                    <use href="assets/icons.svg#icon-node-add"></use>
+                  </svg>
+                  Nodo</button
+                ><button data-tool="edge">
+                  <svg class="icon" width="16" height="16" aria-hidden="true">
+                    <use href="assets/icons.svg#icon-link"></use>
+                  </svg>
+                  Arista</button
+                ><button data-tool="delete">
+                  <svg class="icon" width="16" height="16" aria-hidden="true">
+                    <use href="assets/icons.svg#icon-trash"></use>
+                  </svg>
+                  Eliminar</button
+                ><span class="meta">V · N · A · Supr</span>
+              </div>
+            </div>
+            <div id="graph" aria-label="Grafo de rutas"></div>
+            <div id="graph-access" class="sr-only" aria-label="Nodos del grafo"></div>
+            <div id="legend" class="legend"></div>
+            <div class="zoom">
+              <button id="zoom-in" aria-label="Acercar">
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-zoom-in"></use>
+                </svg></button
+              ><button id="zoom-out" aria-label="Alejar">
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-zoom-out"></use>
+                </svg></button
+              ><button id="fit" aria-label="Ajustar vista">
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-fit"></use>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <footer class="playback">
+            <button id="first" aria-label="Primer ciclo">
+              <svg class="icon" width="16" height="16" aria-hidden="true">
+                <use href="assets/icons.svg#icon-skip-start"></use>
+              </svg></button
+            ><button id="prev" aria-label="Ciclo anterior">
+              <svg class="icon" width="16" height="16" aria-hidden="true">
+                <use href="assets/icons.svg#icon-chevron-left"></use>
+              </svg></button
+            ><button class="primary" id="play">
+              <svg class="icon" width="16" height="16" aria-hidden="true">
+                <use href="assets/icons.svg#icon-play"></use>
+              </svg>
+              Ejecutar</button
+            ><button id="next" aria-label="Ciclo siguiente">
+              <svg class="icon" width="16" height="16" aria-hidden="true">
+                <use href="assets/icons.svg#icon-chevron-right"></use>
+              </svg></button
+            ><button id="last" aria-label="Último ciclo">
+              <svg class="icon" width="16" height="16" aria-hidden="true">
+                <use href="assets/icons.svg#icon-skip-end"></use>
+              </svg>
+            </button>
+            <div class="progress">
+              <div class="progress-label">
+                <span id="progress-text"></span><span id="improvement-count">sin mejoras aún</span>
+              </div>
+              <div class="track" id="track">
+                <div id="progress-fill"></div>
+                <div id="ticks"></div>
+                <div id="playhead"></div>
+              </div>
+            </div>
+            <span class="caps wide-only">VELOCIDAD</span>
+            <div class="segments" id="speeds">
+              <button data-speed="1">1×</button>
+              <button data-speed="10" class="selected">10×</button>
+              <button data-speed="100">100×</button>
+              <button data-speed="max">Máx</button>
+            </div>
+          </footer>
+        </section>
+        <aside class="sidebar">
+          <div class="tabs" role="tablist">
+            <button role="tab" id="inspector-tab" aria-selected="true">Inspector</button
+            ><button role="tab" id="trace-tab" aria-selected="false">
+              Trace <span id="trace-count"></span>
+            </button>
+          </div>
+          <div id="inspector" class="panel"></div>
+          <div id="trace" class="panel" hidden></div>
+        </aside>
+      </main>
+    </div>
+    <dialog class="about" id="about" aria-labelledby="about-title">
+      <div class="about-body">
+        <div class="about-head">
+          <svg width="24" height="24" aria-hidden="true">
+            <use href="assets/icons.svg#brand-mark"></use>
+          </svg>
+          <h2 id="about-title">Acerca de Tourbench</h2>
+        </div>
+        <p>
+          Proyecto académico de teoría de grafos: encuentra la ruta de recolección más corta
+          evaluando por fuerza bruta todos los ciclos hamiltonianos que parten del origen.
+        </p>
+        <div>
+          <h3 class="about-label">AUTOR · JAHAT TRINIDAD</h3>
+          <ul class="about-links">
+            <li>
+              <a href="https://jahattrinidad.com" target="_blank" rel="noopener">
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-arrow-up-right"></use>
+                </svg>
+                <strong>Sitio web</strong>
+                <span>jahattrinidad.com</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/trinity-bytes" target="_blank" rel="noopener">
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-github"></use>
+                </svg>
+                <strong>GitHub</strong>
+                <span>@trinity-bytes</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://github.com/trinity-bytes/green-circuit"
+                target="_blank"
+                rel="noopener"
+              >
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-github"></use>
+                </svg>
+                <strong>Código fuente</strong>
+                <span>green-circuit</span>
+              </a>
+            </li>
+            <li>
+              <a href="./">
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-info"></use>
+                </svg>
+                <strong>Página del proyecto</strong>
+                <span>tourbench.jahattrinidad.com</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="about-footer">
+        <span>2025 · Licencia MIT</span>
+        <button type="button" data-about-close>Cerrar</button>
+      </div>
+    </dialog>
+    <dialog id="confirm">
+      <h2 id="confirm-title">Ejecutar con N = 11</h2>
+      <p>
+        Se evaluarán todos los ciclos hamiltonianos que parten de A. Puedes pausar o detener en
+        cualquier momento; la mejor ruta encontrada hasta ese punto se conserva.
+      </p>
+      <div id="confirm-stats"></div>
+      <div class="dialog-actions">
+        <button id="cancel">Cancelar</button
+        ><button class="primary" id="confirm-run">Ejecutar</button>
+      </div>
+    </dialog>
+    <dialog id="edge-dialog">
+      <h2 id="edge-title">ARISTA</h2>
+      <label class="edge-input" for="edge-weight">
+        <span>w =</span>
+        <input id="edge-weight" type="number" min="0.01" step="0.01" />
+        <span>km</span>
+      </label>
+      <p id="edge-position" class="mono meta"></p>
+      <div class="dialog-actions">
+        <button id="edge-cancel">Restaurar</button
+        ><button class="primary" id="edge-apply">Aplicar</button>
+      </div>
+    </dialog>
+    <div class="sr-only" id="announcement" aria-live="polite"></div>
+    <script src="src/js/Graph.js"></script>
+    <script src="src/js/RandomGenerator.js"></script>
+    <script src="src/js/SearchEngine.js"></script>
+    <script src="src/js/markup.js"></script>
+    <script src="src/js/GraphView.js"></script>
+    <script src="src/js/EditMode.js"></script>
+    <script src="src/js/ResultPanel.js"></script>
+    <script src="src/js/Inspector.js"></script>
+    <script src="src/js/TracePanel.js"></script>
+    <script src="src/js/Playback.js"></script>
+    <script src="src/js/AppView.js"></script>
+    <script src="src/js/about.js"></script>
+    <script src="src/js/app.js"></script>
+  </body>
+</html>

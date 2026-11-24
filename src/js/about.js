@@ -1,5 +1,5 @@
 // Opens the shared "About" dialog from any element marked with data-about-open.
-// Used by index.html and landing.html; the dialog markup lives in each page.
+// Used by index.html (landing) and app.html; the dialog markup lives in each page.
 document.addEventListener("DOMContentLoaded", () => {
   const dialog = document.getElementById("about");
   if (!dialog) return;

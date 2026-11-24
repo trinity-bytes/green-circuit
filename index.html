@@ -2,187 +2,448 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>GreenCircuit — Search Bench</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tourbench — Búsqueda exhaustiva del TSP</title>
+    <meta
+      name="description"
+      content="Tourbench enumera todos los ciclos hamiltonianos de un grafo completo y muestra, paso a paso, cómo la fuerza bruta encuentra la ruta más corta del TSP."
+    />
+    <link rel="canonical" href="https://tourbench.jahattrinidad.com/" />
+    <meta name="theme-color" content="#eff1f5" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Tourbench" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:title" content="Tourbench — Búsqueda exhaustiva del TSP" />
+    <meta
+      property="og:description"
+      content="Tourbench enumera todos los ciclos hamiltonianos de un grafo completo y muestra, paso a paso, cómo la fuerza bruta encuentra la ruta más corta del TSP."
+    />
+    <meta property="og:url" content="https://tourbench.jahattrinidad.com/" />
+    <meta property="og:image" content="https://tourbench.jahattrinidad.com/assets/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Tourbench evaluando todos los ciclos de un grafo de 8 nodos"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="stylesheet" href="src/styles/tokens.css" />
-    <link rel="stylesheet" href="src/styles/app.css" />
+    <link rel="stylesheet" href="src/styles/landing.css" />
     <link rel="stylesheet" href="src/styles/about.css" />
-    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
   </head>
   <body>
-    <div class="small-screen">
-      <svg class="icon" width="24" height="24" aria-hidden="true">
-        <use href="assets/icons.svg#brand-mark"></use>
-      </svg>
-      <h1>GreenCircuit necesita una pantalla más ancha</h1>
-      <p>
-        El grafo, la matriz y el trace no caben por debajo de 1024 px. Mientras tanto, puedes leer
-        cómo funciona.
-      </p>
-      <a href="landing.html">
-        <svg class="icon" width="16" height="16" aria-hidden="true">
-          <use href="assets/icons.svg#icon-arrow-up-right"></use>
-        </svg>
-        Ver la página del proyecto
-      </a>
-    </div>
-    <div class="app">
-      <header class="topbar">
-        <div class="brand">
+    <header class="site-header">
+      <nav class="wrap nav" aria-label="Navegación principal">
+        <a class="brand" href="./">
           <svg class="icon" width="24" height="24" aria-hidden="true">
-            <use href="assets/icons.svg#brand-mark"></use></svg
-          ><strong>GreenCircuit</strong>
+            <use href="assets/icons.svg#brand-mark"></use>
+          </svg>
+          Tourbench
+        </a>
+        <div class="nav-links">
+          <a href="#problema">Problema</a>
+          <a href="#metodo">Método</a>
+          <a href="#complejidad">Complejidad</a>
+          <a href="#arquitectura">Arquitectura</a>
         </div>
-        <span class="divider"></span><span class="caps">N</span>
-        <div class="stepper">
-          <button id="minus" aria-label="Reducir número de nodos">−</button
-          ><output id="node-count">8</output
-          ><button id="plus" aria-label="Aumentar número de nodos">
+        <div class="actions">
+          <a class="button ghost nav-github" href="https://github.com/trinity-bytes/green-circuit">
             <svg class="icon" width="16" height="16" aria-hidden="true">
-              <use href="assets/icons.svg#icon-plus"></use>
+              <use href="assets/icons.svg#icon-github"></use>
             </svg>
-          </button>
+            GitHub
+          </a>
+          <a class="button primary" href="app.html">
+            <svg class="icon" width="16" height="16" aria-hidden="true">
+              <use href="assets/icons.svg#icon-arrow-up-right"></use>
+            </svg>
+            Abrir la app
+          </a>
         </div>
-        <span class="meta mono">4–11</span><span class="caps">LAYOUT</span>
-        <div class="segments" id="layouts">
-          <button data-layout="random" class="selected">Aleatorio</button
-          ><button data-layout="circular">Circular</button
-          ><button data-layout="grid">Cuadrícula</button>
-        </div>
-        <button class="icon-button" id="regenerate" aria-label="Regenerar grafo">
-          <svg class="icon" width="16" height="16" aria-hidden="true">
-            <use href="assets/icons.svg#icon-regenerate"></use>
-          </svg></button
-        ><button id="edit">
-          <svg class="icon" width="16" height="16" aria-hidden="true">
-            <use href="assets/icons.svg#icon-pencil"></use>
-          </svg>
-          Editar grafo
-        </button>
-        <div class="grow"></div>
-        <span class="mono" id="complexity"></span
-        ><button id="restart" hidden>
-          <svg class="icon" width="16" height="16" aria-hidden="true">
-            <use href="assets/icons.svg#icon-regenerate"></use>
-          </svg>
-          Reiniciar</button
-        ><span class="divider"></span
-        ><button type="button" data-about-open>Acerca del proyecto</button
-        ><a
-          href="https://github.com/trinity-bytes/green-circuit"
-          aria-label="Código fuente en GitHub"
-          ><svg class="icon" width="16" height="16" aria-hidden="true">
-            <use href="assets/icons.svg#icon-github"></use></svg
-        ></a>
-      </header>
-      <main class="body">
-        <section class="stage">
-          <div class="canvas">
-            <div class="canvas-meta">
-              <div class="caps" id="instance"></div>
-              <p id="canvas-help">
-                Arrastra un nodo para moverlo · doble clic en una arista para editar su peso
-              </p>
-              <div id="tools" hidden>
-                <button data-tool="select">
-                  <svg class="icon" width="16" height="16" aria-hidden="true">
-                    <use href="assets/icons.svg#icon-cursor"></use>
-                  </svg>
-                  Seleccionar</button
-                ><button data-tool="node">
-                  <svg class="icon" width="16" height="16" aria-hidden="true">
-                    <use href="assets/icons.svg#icon-node-add"></use>
-                  </svg>
-                  Nodo</button
-                ><button data-tool="edge">
-                  <svg class="icon" width="16" height="16" aria-hidden="true">
-                    <use href="assets/icons.svg#icon-link"></use>
-                  </svg>
-                  Arista</button
-                ><button data-tool="delete">
-                  <svg class="icon" width="16" height="16" aria-hidden="true">
-                    <use href="assets/icons.svg#icon-trash"></use>
-                  </svg>
-                  Eliminar</button
-                ><span class="meta">V · N · A · Supr</span>
-              </div>
-            </div>
-            <div id="graph" aria-label="Grafo de rutas"></div>
-            <div id="graph-access" class="sr-only" aria-label="Nodos del grafo"></div>
-            <div id="legend" class="legend"></div>
-            <div class="zoom">
-              <button id="zoom-in" aria-label="Acercar">
-                <svg class="icon" width="16" height="16" aria-hidden="true">
-                  <use href="assets/icons.svg#icon-zoom-in"></use>
-                </svg></button
-              ><button id="zoom-out" aria-label="Alejar">
-                <svg class="icon" width="16" height="16" aria-hidden="true">
-                  <use href="assets/icons.svg#icon-zoom-out"></use>
-                </svg></button
-              ><button id="fit" aria-label="Ajustar vista">
-                <svg class="icon" width="16" height="16" aria-hidden="true">
-                  <use href="assets/icons.svg#icon-fit"></use>
-                </svg>
-              </button>
-            </div>
-          </div>
-          <footer class="playback">
-            <button id="first" aria-label="Primer ciclo">
+      </nav>
+    </header>
+    <main>
+      <section class="hero wrap">
+        <div class="hero-copy">
+          <p class="eyebrow">PROYECTO ACADÉMICO · TEORÍA DE GRAFOS</p>
+          <h1>La ruta de recolección más corta, encontrada por fuerza bruta.</h1>
+          <p>
+            Tourbench modela los puntos de recolección como un grafo completo, enumera los (N−1)!
+            ciclos hamiltonianos que parten del origen y conserva el de menor costo. Cada paso queda
+            a la vista: la ruta evaluada, su suma y la celda de la matriz que la produce.
+          </p>
+          <div class="actions">
+            <a class="button primary" href="app.html">
               <svg class="icon" width="16" height="16" aria-hidden="true">
-                <use href="assets/icons.svg#icon-skip-start"></use>
-              </svg></button
-            ><button id="prev" aria-label="Ciclo anterior">
-              <svg class="icon" width="16" height="16" aria-hidden="true">
-                <use href="assets/icons.svg#icon-chevron-left"></use>
-              </svg></button
-            ><button class="primary" id="play">▷ &nbsp; Ejecutar</button
-            ><button id="next" aria-label="Ciclo siguiente">
-              <svg class="icon" width="16" height="16" aria-hidden="true">
-                <use href="assets/icons.svg#icon-chevron-right"></use>
-              </svg></button
-            ><button id="last" aria-label="Último ciclo">
-              <svg class="icon" width="16" height="16" aria-hidden="true">
-                <use href="assets/icons.svg#icon-skip-end"></use>
+                <use href="assets/icons.svg#icon-play"></use>
               </svg>
-            </button>
-            <div class="progress">
-              <div class="progress-label">
-                <span id="progress-text"></span><span id="improvement-count">sin mejoras aún</span>
-              </div>
-              <div class="track" id="track">
-                <div id="progress-fill"></div>
-                <div id="ticks"></div>
-                <div id="playhead"></div>
-              </div>
-            </div>
-            <span class="caps">VELOCIDAD</span>
-            <div class="segments" id="speeds">
-              <button data-speed="1">1×</button>
-              <button data-speed="10" class="selected">10×</button>
-              <button data-speed="100">100×</button>
-              <button data-speed="max">Máx</button>
-            </div>
-          </footer>
-        </section>
-        <aside class="sidebar">
-          <div class="tabs" role="tablist">
-            <button role="tab" id="inspector-tab" aria-selected="true">Inspector</button
-            ><button role="tab" id="trace-tab" aria-selected="false">
-              Trace <span id="trace-count"></span>
-            </button>
+              Abrir la app
+            </a>
+            <a class="button outline" href="https://github.com/trinity-bytes/green-circuit">
+              <svg class="icon" width="16" height="16" aria-hidden="true">
+                <use href="assets/icons.svg#icon-github"></use>
+              </svg>
+              Ver código fuente
+            </a>
           </div>
-          <div id="inspector" class="panel"></div>
-          <div id="trace" class="panel" hidden></div>
-        </aside>
-      </main>
-    </div>
+          <div class="facts">
+            <div>
+              <span class="eyebrow">PUNTOS</span>
+              <strong>4–11</strong>
+            </div>
+            <div>
+              <span class="eyebrow">CICLOS CON N = 8</span>
+              <strong>5 040</strong>
+            </div>
+            <div>
+              <span class="eyebrow">DEPENDENCIAS</span>
+              <strong>Cytoscape.js</strong>
+            </div>
+          </div>
+        </div>
+        <div class="graph-panel">
+          <div class="graph-header">
+            <span class="eyebrow">N = 8 · ALEATORIO</span>
+            <span class="graph-caption">
+              <span class="route-swatch" aria-hidden="true"></span>
+              18.16 km · ciclo #2 121 de 5 040
+            </span>
+          </div>
+          <svg
+            class="graph"
+            viewBox="0 0 520 410"
+            role="img"
+            aria-label="Grafo de ocho puntos con la ruta óptima destacada en verde"
+          >
+            <g class="edges">
+              <path
+                d="M48 367 181 40 385 188 200 289 426 55 474 315 105 180 355 367Z M48 367 385 188 426 55 105 180 200 289 181 40 474 315 355 367 385 188 M48 367 200 289 474 315 M48 367 426 55 M48 367 105 180 M48 367 355 367 M181 40 426 55 M181 40 105 180 M181 40 355 367 M385 188 474 315 M385 188 105 180 M200 289 355 367 M200 289 105 180 M426 55 355 367 M426 55 474 315 M105 180 474 315 M105 180 355 367"
+              />
+            </g>
+            <path
+              class="best"
+              d="M48 367 105 180 181 40 426 55 385 188 474 315 355 367 200 289 48 367"
+            />
+            <g class="nodes">
+              <circle class="start-ring" cx="48" cy="367" r="20" />
+              <circle class="start" cx="48" cy="367" r="16" />
+              <circle cx="181" cy="40" r="16" />
+              <circle cx="385" cy="188" r="16" />
+              <circle cx="200" cy="289" r="16" />
+              <circle cx="426" cy="55" r="16" />
+              <circle cx="474" cy="315" r="16" />
+              <circle cx="105" cy="180" r="16" />
+              <circle cx="355" cy="367" r="16" />
+            </g>
+            <g class="node-labels">
+              <text class="start-label" x="48" y="367">A</text>
+              <text x="181" y="40">B</text>
+              <text x="385" y="188">C</text>
+              <text x="200" y="289">D</text>
+              <text x="426" y="55">E</text>
+              <text x="474" y="315">F</text>
+              <text x="105" y="180">G</text>
+              <text x="355" y="367">H</text>
+            </g>
+          </svg>
+        </div>
+      </section>
+      <section id="problema" class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow">01 — PROBLEMA</p>
+            <h2>Visitar cada punto una sola vez y volver al origen.</h2>
+            <p>
+              Es el problema del agente viajero (TSP) sobre un grafo completo y no dirigido. Los
+              pesos son distancias euclidianas entre puntos del plano.
+            </p>
+          </div>
+          <div class="problem-grid">
+            <article>
+              <p class="eyebrow">NODOS</p>
+              <p class="formula">V = {A, B, …}</p>
+              <p>Puntos de recolección. El primero (A) es el origen.</p>
+            </article>
+            <article>
+              <p class="eyebrow">ARISTAS</p>
+              <p class="formula">w(i, j) = ‖pᵢ − pⱼ‖ · 0.01</p>
+              <p>Distancia en km. Matriz simétrica, diagonal nula.</p>
+            </article>
+            <article>
+              <p class="eyebrow">OBJETIVO</p>
+              <p class="formula">min C(π)</p>
+              <p>π recorre todos los nodos una vez y vuelve a A.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section id="metodo" class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow">02 — MÉTODO</p>
+            <h2>Backtracking sobre todos los ciclos hamiltonianos.</h2>
+            <p>
+              No hay heurísticas: se recorren todas las permutaciones de los nodos restantes y se
+              guarda la de menor costo. Es exacto, y por eso mismo crece factorialmente.
+            </p>
+          </div>
+          <div class="cards phases">
+            <article>
+              <div class="card-top">
+                <span class="eyebrow">FASE 1</span>
+                <span>O(N²)</span>
+              </div>
+              <h3>Matriz de adyacencia</h3>
+              <p>Se precalcula w(i, j) para consultas en O(1).</p>
+            </article>
+            <article>
+              <div class="card-top">
+                <span class="eyebrow">FASE 2</span>
+                <span>O((N−1)!)</span>
+              </div>
+              <h3>Backtracking desde A</h3>
+              <p>
+                Se extiende la ruta con cada nodo no visitado y se retrocede al completar o agotar
+                opciones.
+              </p>
+            </article>
+            <article>
+              <div class="card-top">
+                <span class="eyebrow">FASE 3</span>
+                <span>O(N) por ciclo</span>
+              </div>
+              <h3>Evaluación</h3>
+              <p>Cada ciclo suma sus N aristas; si mejora al óptimo actual, lo reemplaza.</p>
+            </article>
+          </div>
+          <div class="equation">
+            C(π) = w(π₀, π₁) + w(π₁, π₂) + … + w(πₙ₋₁, π₀)
+            <br />
+            π* = argmin C(π), π ∈ permutaciones de {B, …, N} precedidas por A
+            <br />
+            |ciclos| = (N − 1)! · cada recorrido aparece dos veces (y su inverso)
+          </div>
+        </div>
+      </section>
+      <section id="complejidad" class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow">03 — COMPLEJIDAD</p>
+            <h2>El muro factorial.</h2>
+            <p>
+              Cada punto extra multiplica el trabajo por N − 1. Por eso la app limita N a 11: más
+              allá, el navegador tardaría minutos u horas en terminar.
+            </p>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>N</th>
+                  <th>(N − 1)!</th>
+                  <th>ESCALA (LOG₁₀)</th>
+                  <th>TIEMPO ESTIMADO*</th>
+                  <th>ESTADO</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>4</td>
+                  <td>6</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 8.8%" aria-hidden="true"></span>
+                  </td>
+                  <td>&lt; 1 ms</td>
+                  <td>Instantáneo</td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td>120</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 23.1%" aria-hidden="true"></span>
+                  </td>
+                  <td>&lt; 1 ms</td>
+                  <td>Instantáneo</td>
+                </tr>
+                <tr>
+                  <td>8</td>
+                  <td>5 040</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 41.2%" aria-hidden="true"></span>
+                  </td>
+                  <td>~0.05 s</td>
+                  <td>Valor por defecto</td>
+                </tr>
+                <tr>
+                  <td>9</td>
+                  <td>40 320</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 51.2%" aria-hidden="true"></span>
+                  </td>
+                  <td>~0.4 s</td>
+                  <td>Sin aviso</td>
+                </tr>
+                <tr class="warn">
+                  <td>10</td>
+                  <td>362 880</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 61.7%" aria-hidden="true"></span>
+                  </td>
+                  <td>~4 s</td>
+                  <td>Avisa antes de ejecutar</td>
+                </tr>
+                <tr class="warn">
+                  <td>11</td>
+                  <td>3 628 800</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 72.8%" aria-hidden="true"></span>
+                  </td>
+                  <td>~36 s</td>
+                  <td>Límite de la app</td>
+                </tr>
+                <tr>
+                  <td>12</td>
+                  <td>39 916 800</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 84.5%" aria-hidden="true"></span>
+                  </td>
+                  <td>~7 min</td>
+                  <td>Fuera de alcance</td>
+                </tr>
+                <tr>
+                  <td>13</td>
+                  <td>479 001 600</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 96.5%" aria-hidden="true"></span>
+                  </td>
+                  <td>~1.3 h</td>
+                  <td>Fuera de alcance</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">
+            * Estimación a ~10⁵ ciclos/s. La app mide la tasa real durante la ejecución y actualiza
+            el tiempo restante.
+          </p>
+        </div>
+      </section>
+      <section class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow">04 — MÉTRICAS DERIVADAS</p>
+            <h2>De kilómetros a minutos y emisiones.</h2>
+            <p>
+              Dos supuestos fijos convierten la distancia de la ruta en indicadores operativos. Se
+              muestran junto al resultado, con sus valores reales.
+            </p>
+          </div>
+          <div class="cards metrics">
+            <article>
+              <p class="eyebrow">TIEMPO</p>
+              <p class="formula">t = d / v × 60</p>
+              <p>v = 25 km/h, velocidad media urbana del camión</p>
+              <p class="example">
+                Ej.
+                <span>18.16 km → 43.58 min</span>
+              </p>
+            </article>
+            <article>
+              <p class="eyebrow">EMISIONES</p>
+              <p class="formula">CO₂ = d × e</p>
+              <p>e = 0.2 kg/km, factor de emisión por kilómetro</p>
+              <p class="example">
+                Ej.
+                <span>18.16 km → 3.63 kg</span>
+              </p>
+            </article>
+            <article>
+              <p class="eyebrow">AHORRO</p>
+              <p class="formula">Δ = C(π_peor) − C(π*)</p>
+              <p>Se compara contra la peor ruta encontrada</p>
+              <p class="example">
+                Ej.
+                <span>38.88 − 18.16 = 20.72 km</span>
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section id="arquitectura" class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow">05 — ARQUITECTURA</p>
+            <h2>Módulos pequeños, sin backend.</h2>
+            <p>
+              Todo corre en el navegador con JavaScript sin frameworks. El grafo es la única fuente
+              de verdad; los algoritmos no conocen la interfaz.
+            </p>
+          </div>
+          <div class="flow">
+            <div class="flow-group">
+              <article>
+                <strong>RandomGenerator</strong>
+                <p>Layouts aleatorio, circular y cuadrícula</p>
+              </article>
+              <article>
+                <strong>GraphEditor</strong>
+                <p>Nodos, aristas y pesos a mano</p>
+              </article>
+            </div>
+            <span aria-hidden="true">→</span>
+            <article class="central">
+              <strong>Graph</strong>
+              <p>Nodos, aristas y matriz de adyacencia</p>
+            </article>
+            <span aria-hidden="true">→</span>
+            <article>
+              <strong>HamiltonianFinder</strong>
+              <p>Backtracking desde el origen</p>
+            </article>
+            <span aria-hidden="true">→</span>
+            <article>
+              <strong>TSPSolver</strong>
+              <p>Costo por ciclo, óptimo y peor</p>
+            </article>
+            <span aria-hidden="true">→</span>
+            <div class="flow-group">
+              <article>
+                <strong>CytoscapeRenderer</strong>
+                <p>Dibuja el grafo y la ruta</p>
+              </article>
+              <article>
+                <strong>Trace</strong>
+                <p>Tabla de ejecución y exportación</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="wrap footer">
+      <div>
+        <p>Tourbench · 2025 · Licencia MIT</p>
+        <p>
+          Proyecto académico publicado como referencia. Reutilizarlo en entregas calificadas queda
+          bajo tu criterio y las políticas de tu institución.
+        </p>
+      </div>
+      <nav aria-label="Enlaces del pie">
+        <a href="app.html">Abrir la app</a>
+        <a href="https://github.com/trinity-bytes/green-circuit">Código fuente</a>
+        <a href="https://github.com/trinity-bytes/green-circuit#readme">README</a>
+        <button type="button" class="footer-about" data-about-open>Acerca de</button>
+      </nav>
+    </footer>
     <dialog class="about" id="about" aria-labelledby="about-title">
       <div class="about-body">
         <div class="about-head">
           <svg width="24" height="24" aria-hidden="true">
             <use href="assets/icons.svg#brand-mark"></use>
           </svg>
-          <h2 id="about-title">Acerca de GreenCircuit</h2>
+          <h2 id="about-title">Acerca de Tourbench</h2>
         </div>
         <p>
           Proyecto académico de teoría de grafos: encuentra la ruta de recolección más corta
@@ -222,15 +483,6 @@
                 <span>green-circuit</span>
               </a>
             </li>
-            <li>
-              <a href="landing.html">
-                <svg class="icon" width="16" height="16" aria-hidden="true">
-                  <use href="assets/icons.svg#icon-info"></use>
-                </svg>
-                <strong>Página del proyecto</strong>
-                <span>landing.html</span>
-              </a>
-            </li>
           </ul>
         </div>
       </div>
@@ -239,44 +491,6 @@
         <button type="button" data-about-close>Cerrar</button>
       </div>
     </dialog>
-    <dialog id="confirm">
-      <h2 id="confirm-title">Ejecutar con N = 11</h2>
-      <p>
-        Se evaluarán todos los ciclos hamiltonianos que parten de A. Puedes pausar o detener en
-        cualquier momento; la mejor ruta encontrada hasta ese punto se conserva.
-      </p>
-      <div id="confirm-stats"></div>
-      <div class="dialog-actions">
-        <button id="cancel">Cancelar</button
-        ><button class="primary" id="confirm-run">Ejecutar</button>
-      </div>
-    </dialog>
-    <dialog id="edge-dialog">
-      <h2 id="edge-title">ARISTA</h2>
-      <label class="edge-input" for="edge-weight">
-        <span>w =</span>
-        <input id="edge-weight" type="number" min="0.01" step="0.01" />
-        <span>km</span>
-      </label>
-      <p id="edge-position" class="mono meta"></p>
-      <div class="dialog-actions">
-        <button id="edge-cancel">Restaurar</button
-        ><button class="primary" id="edge-apply">Aplicar</button>
-      </div>
-    </dialog>
-    <div class="sr-only" id="announcement" aria-live="polite"></div>
-    <script src="src/js/Graph.js"></script>
-    <script src="src/js/RandomGenerator.js"></script>
-    <script src="src/js/SearchEngine.js"></script>
-    <script src="src/js/markup.js"></script>
-    <script src="src/js/GraphView.js"></script>
-    <script src="src/js/EditMode.js"></script>
-    <script src="src/js/ResultPanel.js"></script>
-    <script src="src/js/Inspector.js"></script>
-    <script src="src/js/TracePanel.js"></script>
-    <script src="src/js/Playback.js"></script>
-    <script src="src/js/AppView.js"></script>
     <script src="src/js/about.js"></script>
-    <script src="src/js/app.js"></script>
   </body>
 </html>

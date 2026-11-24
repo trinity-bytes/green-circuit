@@ -1,18 +1,19 @@
-# Documentación General - GreenCircuit
+# Documentación técnica — Tourbench
 
 ## Visión General
 
-GreenCircuit es una aplicación web (HTML, CSS y JavaScript sin frameworks) que resuelve el problema del agente viajero (TSP) por fuerza bruta para optimizar rutas de recolección de residuos. Todo corre en el navegador; no hay backend. La interfaz ("Search Bench") muestra en vivo la ruta evaluada, su suma parcial, la mejor ruta encontrada y la celda de la matriz que la produce.
+Tourbench es una aplicación web (HTML, CSS y JavaScript sin frameworks) que resuelve el problema del agente viajero (TSP) por fuerza bruta y muestra la búsqueda paso a paso. Todo corre en el navegador; no hay backend. La interfaz ("Search Bench") muestra en vivo la ruta evaluada, su suma parcial, la mejor ruta encontrada y la celda de la matriz que la produce.
 
 ## Arquitectura de Código
 
-Cada módulo es una clase global cargada con `<script>` en `index.html`. Los algoritmos no conocen la interfaz.
+Cada módulo es una clase global cargada con `<script>` en `app.html`. Los algoritmos no conocen la interfaz.
 
 | Módulo               | Rol principal                                                                 |
 | -------------------- | ----------------------------------------------------------------------------- |
 | `Graph.js`           | Modelo del grafo: nodos, aristas y matriz de adyacencia.                      |
 | `RandomGenerator.js` | Layouts aleatorio (con semilla opcional), circular y cuadrícula.              |
 | `SearchEngine.js`    | Backtracking en streaming: evalúa ciclos, mejor/peor ruta, mejoras, métricas. |
+| `about.js`           | Abre el diálogo "Acerca de" en ambas páginas.                                 |
 | `markup.js`          | Helpers de marcado compartidos (secciones, estadísticas, íconos).             |
 | `GraphView.js`       | Renderizado con Cytoscape.js, resaltado de rutas y nodos accesibles por Tab.  |
 | `Inspector.js`       | Pestaña Inspector: pasos, ruta actual, mejor ruta, matriz y modelo.           |
@@ -42,12 +43,12 @@ Cada módulo es una clase global cargada con `<script>` en `index.html`. Los alg
 - **Lienzo**: grafo con la ruta en evaluación (azul) y la mejor encontrada (verde).
 - **Inspector / Trace**: paneles laterales descritos arriba.
 - **Teclado**: Espacio ejecutar/pausar · ←/→ paso · Inicio/Fin · 1/2 pestañas · E edición · V/N/A/Supr herramientas · Tab recorre nodos · Esc cierra el popover.
-- Por debajo de 1024 px se muestra un aviso con enlace a `landing.html`.
+- Entre 1024 y 1279 px se ocultan etiquetas secundarias de la barra superior y de reproducción; por debajo de 1024 px se muestra un aviso con enlace a la página del proyecto.
 
 ## Estilos
 
 - `src/styles/tokens.css`: paleta Catppuccin Latte, roles de color y estilos de texto (IBM Plex Sans / Mono).
-- `src/styles/app.css` y `src/styles/landing.css`: estilos de cada página.
+- `src/styles/app.css`, `src/styles/landing.css` y `src/styles/about.css`: estilos de la app, la página del proyecto y el diálogo "Acerca de".
 - `assets/icons.svg`: sprite de íconos exportado del diseño en Figma.
 
 ## Pruebas
@@ -65,11 +66,13 @@ npm test   # node --test, sin dependencias
 
 ```text
 root
-├─ index.html
-├─ landing.html
+├─ index.html      (página del proyecto, raíz del sitio)
+├─ app.html        (la app, /app en Cloudflare Pages)
 ├─ package.json
 ├─ assets/
-│  └─ icons.svg
+│  ├─ icons.svg
+│  ├─ favicon.svg / apple-touch-icon.png
+│  └─ og.png      (imagen para redes, 1200×630)
 ├─ src/
 │  ├─ js/        (módulos listados arriba)
 │  └─ styles/

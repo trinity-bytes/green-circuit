@@ -1,4 +1,4 @@
-/* About dialog shared by index.html and landing.html. Uses tokens from tokens.css. */
+/* About dialog shared by index.html (landing) and app.html. Uses tokens from tokens.css. */
 
 .about {
   width: min(440px, calc(100vw - 32px));

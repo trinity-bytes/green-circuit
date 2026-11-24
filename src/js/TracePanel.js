@@ -150,7 +150,7 @@ class TracePanel {
     );
     const a = document.createElement("a");
     a.href = url;
-    a.download = `greencircuit-trace.${type}`;
+    a.download = `tourbench-trace.${type}`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 0);
   }

@@ -1,138 +1,181 @@
-# 🌱 GreenCircuit
+<div align="center">
 
-## Optimización de Rutas de Recolección de Residuos Urbanos
+<img src="assets/favicon.svg" width="64" height="64" alt="Logo de Tourbench" />
 
-Aplicación web interactiva que implementa el **Problema del Agente Viajero (TSP)** para optimizar rutas de recolección de residuos, minimizando distancias, tiempo de recorrido y emisiones de CO₂.
+# Tourbench
 
----
+**Búsqueda exhaustiva del problema del agente viajero (TSP), paso a paso.**
 
-## ⚠️ Aviso Académico
+Enumera todos los ciclos hamiltonianos de un grafo completo y muestra en vivo la ruta evaluada, su suma, la mejor encontrada y la celda de la matriz que la produce.
 
-Este proyecto se publica con fines académicos y de referencia. El código está disponible para que otras personas se inspiren y aprendan, pero **no me hago responsable por el plagio total o parcial en entregas con calificación**. Si reutilizas partes del proyecto para trabajos evaluados, hazlo bajo tu propio criterio y respetando las políticas de tu institución.
+[![Demo](https://img.shields.io/badge/demo-tourbench.jahattrinidad.com-40a02b?style=flat-square)](https://tourbench.jahattrinidad.com)
+[![Licencia MIT](https://img.shields.io/badge/licencia-MIT-4c4f69?style=flat-square)](LICENSE)
+![JavaScript sin frameworks](https://img.shields.io/badge/JavaScript-sin%20frameworks-df8e1d?style=flat-square)
+![Cytoscape.js 3.35](https://img.shields.io/badge/Cytoscape.js-3.35-1e66f5?style=flat-square)
+![Tests node --test](https://img.shields.io/badge/tests-node%20--test-5c5f77?style=flat-square)
 
----
+[**Abrir la app →**](https://tourbench.jahattrinidad.com/app) · [Página del proyecto](https://tourbench.jahattrinidad.com) · [Documentación técnica](DOCUMENTATION.md)
 
-## 📋 Descripción del Proyecto
+<img src="docs/screenshots/app-running.png" alt="Tourbench evaluando ciclos: ruta en azul, mejor ruta en verde, matriz de adyacencia a la derecha" />
 
-**GreenCircuit** resuelve el problema de optimización de rutas urbanas aplicado a la recolección de residuos. Utiliza algoritmos de grafos para encontrar la ruta más eficiente que visite todos los puntos de recolección exactamente una vez y regrese al punto de origen.
-
-### Objetivos
-
-- ✅ Minimizar la distancia total recorrida.
-- ✅ Reducir el tiempo de recolección.
-- ✅ Disminuir las emisiones de CO₂.
-- ✅ Optimizar recursos operativos y contribuir a la sostenibilidad urbana.
+</div>
 
 ---
 
-## 🚀 Cómo Ejecutar
+## Qué es
 
-### Método Simple (Recomendado)
+Tourbench es un banco de pruebas visual del TSP resuelto **por fuerza bruta**. No usa heurísticas: con N puntos recorre los (N−1)! ciclos que parten del origen y se queda con el de menor costo. Es un proyecto académico de teoría de grafos cuyo objetivo es que el costo factorial se **vea**, no solo que se explique.
 
-1. Abre el archivo `index.html` en tu navegador web (haciendo doble clic).
-2. ¡Listo para usar! ✅
+> [!NOTE]
+> La app necesita al menos **1024 px** de ancho. En pantallas más chicas muestra un aviso con enlace a la página del proyecto.
 
-### Requisitos
+## Capturas
 
-- **Navegador moderno**: Chrome, Firefox, Edge o Safari (versión actualizada).
-- **JavaScript habilitado** (activado por defecto en la mayoría de los navegadores).
-- **Conexión a Internet**: Solo se necesita la primera vez para cargar la biblioteca de visualización (Cytoscape.js). Después, funciona sin conexión.
+| Ejecución (Inspector)                                                                    | Trace                                                                           |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| ![Inspector durante la ejecución](docs/screenshots/app-running.png)                      | ![Trace virtualizado con filtro de mejoras](docs/screenshots/app-trace.png)     |
+| **Resultado**                                                                            | **Edición del grafo**                                                           |
+| ![Ruta óptima, métricas y comparación con la peor ruta](docs/screenshots/app-result.png) | ![Modo edición con el popover de peso de arista](docs/screenshots/app-edit.png) |
 
----
+<details>
+<summary>Página del proyecto</summary>
 
-## 🎯 Cómo Usar la Aplicación
+![Landing de Tourbench](docs/screenshots/landing.png)
 
-1. Elige el **número de puntos (N)** entre 4 y 11 y un **layout** (Aleatorio, Circular o Cuadrícula).
-2. Pulsa **Ejecutar** (o `Espacio`). Con N ≥ 10 se pide confirmación con el tiempo y la memoria estimados.
-3. Observa el **Inspector**: la ruta en evaluación (azul) con su suma, la mejor encontrada (verde) y la celda activa de la matriz.
-4. Abre el **Trace** (`2`) para ver cada ciclo evaluado, filtrar solo las mejoras y exportar a CSV o JSON.
-5. Al terminar, el **Resultado** muestra la ruta óptima, su tiempo y CO₂, y la comparación con la peor ruta.
-6. **Editar grafo** (`E`) permite mover nodos y cambiar pesos de aristas (doble clic en una arista).
+</details>
 
-Atajos: `Espacio` ejecutar/pausar · `←`/`→` paso · `Inicio`/`Fin` · `1`/`2` pestañas · `Tab` recorre nodos.
+## Funcionalidades
 
----
+| Área              | Qué hace                                                                                                 |
+| ----------------- | -------------------------------------------------------------------------------------------------------- |
+| **Instancia**     | N entre 4 y 11, layouts aleatorio, circular y cuadrícula, regenerar con un clic.                         |
+| **Inspector**     | Ruta actual con su suma parcial, mejor ruta hasta el momento, matriz con las aristas activas resaltadas. |
+| **Trace**         | Tabla virtualizada de todos los ciclos evaluados, filtro "solo mejoras" y exportación a CSV / JSON.      |
+| **Resultado**     | Ruta óptima, distancia, tiempo y CO₂, fórmulas con los valores reales y comparación con la peor ruta.    |
+| **Reproducción**  | Ejecutar, pausar, avanzar ciclo a ciclo e ir al final; velocidades 1×, 10×, 100× y Máx.                  |
+| **Edición**       | Mover nodos y cambiar pesos de aristas; valida si el grafo todavía tiene un ciclo hamiltoniano.          |
+| **Accesibilidad** | Atajos de teclado, nodos recorribles con Tab, anuncios por `aria-live` y `prefers-reduced-motion`.       |
 
-## 📁 Estructura del Proyecto
+### Atajos de teclado
 
-```text
-📦 GreenCircuit/
-├── 📄 index.html                 # Aplicación (Search Bench)
-├── 📄 landing.html               # Página del proyecto
-├── 📖 README.md
-├── 📖 DOCUMENTATION.md           # Arquitectura y algoritmos
-├── 📦 package.json               # Script de pruebas (node --test)
-├── 📁 assets/icons.svg           # Sprite de íconos
-├── 📁 test/                      # Pruebas del motor de búsqueda
-└── 📁 src/
-    ├── 📁 js/
-    │   ├── app.js                # Estado, eventos y atajos
-    │   ├── Graph.js              # Modelo del grafo y matriz
-    │   ├── RandomGenerator.js    # Layouts de puntos
-    │   ├── SearchEngine.js       # Backtracking en streaming
-    │   ├── markup.js             # Helpers de marcado
-    │   ├── GraphView.js          # Render con Cytoscape.js
-    │   ├── Inspector.js          # Pestaña Inspector
-    │   ├── ResultPanel.js        # Resultado
-    │   ├── TracePanel.js         # Pestaña Trace y exportación
-    │   ├── Playback.js           # Reproducción y confirmación
-    │   ├── EditMode.js           # Modo edición
-    │   └── AppView.js            # Barra superior y reproducción
-    └── 📁 styles/
-        ├── tokens.css            # Paleta y tipografía (Catppuccin Latte)
-        ├── app.css               # Estilos de la aplicación
-        └── landing.css           # Estilos de la landing
+| Tecla              | Acción                                |
+| ------------------ | ------------------------------------- |
+| `Espacio`          | Ejecutar / pausar                     |
+| `←` `→`            | Ciclo anterior / siguiente (en pausa) |
+| `Inicio` `Fin`     | Primer ciclo / saltar al resultado    |
+| `1` `2`            | Pestañas Inspector / Trace            |
+| `E`                | Entrar o salir del modo edición       |
+| `V` `N` `A` `Supr` | Herramientas de edición               |
+| `Tab`              | Recorrer los nodos del grafo          |
+
+## Cómo funciona
+
+```mermaid
+flowchart LR
+    A["Fase 1<br/>Matriz de adyacencia<br/><i>O(N²)</i>"] --> B["Fase 2<br/>Backtracking desde A<br/><i>O((N−1)!)</i>"]
+    B --> C["Fase 3<br/>Evaluación de cada ciclo<br/><i>O(N) por ciclo</i>"]
+    C -->|"¿mejora al óptimo?"| D["Registrar mejora"]
+    C --> B
 ```
 
----
+1. **Matriz.** Se precalcula `w(i, j) = ‖pᵢ − pⱼ‖ · 0.01` km para consultar cualquier distancia en O(1).
+2. **Backtracking.** `SearchEngine` enumera las permutaciones de los nodos restantes en orden lexicográfico **sin guardar las rutas**: solo un `Float32Array` con el costo de cada ciclo. La ruta de cualquier fila se reconstruye a partir de su índice.
+3. **Evaluación.** Cada ciclo suma sus N aristas; si mejora al óptimo actual, se registra.
 
-## 🏗️ Arquitectura Técnica
+### El muro factorial
 
-El proyecto sigue una arquitectura modular con una clara separación de responsabilidades.
+| N   | Ciclos (N−1)! | Tiempo estimado* | En la app         |
+| --- | ------------: | ---------------: | ----------------- |
+| 8   |         5 040 |          ~0.05 s | Valor por defecto |
+| 10  |       362 880 |             ~4 s | Pide confirmación |
+| 11  |     3 628 800 |            ~36 s | Límite            |
+| 12  |    39 916 800 |           ~7 min | Fuera de alcance  |
+| 13  |   479 001 600 |           ~1.3 h | Fuera de alcance  |
 
-- **`Graph.js`**: Representa el grafo, almacena nodos y aristas, y construye la matriz de adyacencia.
-- **`SearchEngine.js`**: Implementa el **backtracking** desde A y evalúa cada ciclo por **fuerza bruta** sin guardar las rutas: solo el costo de cada ciclo en un `Float32Array`. La ruta de cualquier ciclo se reconstruye desde su índice.
-- **`RandomGenerator.js`**: Genera los puntos en los modos aleatorio, circular y cuadrícula.
-- **`GraphView.js`**: Utiliza **Cytoscape.js** para renderizar el grafo y resaltar la ruta en evaluación y la mejor.
-- **`Inspector.js`, `TracePanel.js`, `ResultPanel.js`, `Playback.js`, `EditMode.js`, `AppView.js`**: Vistas de la interfaz.
-- **`app.js`**: Estado compartido, cableado de eventos y atajos de teclado.
+<sub>* Estimación a ~10⁵ ciclos/s. La app mide la tasa real durante la ejecución.</sub>
 
----
+### Métricas derivadas
 
-## 📈 Complejidad Computacional
+| Métrica   | Fórmula                 | Supuesto                        |
+| --------- | ----------------------- | ------------------------------- |
+| Tiempo    | `t = d / 25 × 60` min   | 25 km/h, velocidad media urbana |
+| Emisiones | `CO₂ = d × 0.2` kg      | 0.2 kg de CO₂ por km            |
+| Ahorro    | `Δ = C(π_peor) − C(π*)` | Comparación contra la peor ruta |
 
-| Operación                        | Complejidad   | Descripción                                         |
-| -------------------------------- | ------------- | --------------------------------------------------- |
-| Búsqueda de ciclos hamiltonianos | **O((n-1)!)** | Backtracking recursivo para explorar permutaciones. |
-| Resolución TSP (fuerza bruta)    | **O(n!)**     | Evalúa la distancia de todos los ciclos.            |
-| Construcción del grafo completo  | **O(n²)**     | Genera n(n-1)/2 aristas para un grafo completo.     |
+## Arquitectura
 
-**⚠️ Importante:** Por la complejidad factorial, la aplicación limita N a 11 (3 628 800 ciclos). Con N = 12 serían casi 40 millones de ciclos.
+Todo corre en el navegador, sin backend ni build. Cada módulo es una clase global cargada con `<script>`; los algoritmos no conocen la interfaz.
 
----
+```mermaid
+flowchart TB
+    subgraph Modelo
+        RG[RandomGenerator] --> G[Graph]
+        G --> SE[SearchEngine]
+    end
+    subgraph Vistas
+        GV[GraphView<br/>Cytoscape.js]
+        IN[Inspector]
+        RP[ResultPanel]
+        TP[TracePanel]
+        PB[Playback]
+        EM[EditMode]
+        AV[AppView]
+    end
+    APP[app.js<br/>estado + atajos] --> Modelo
+    APP --> Vistas
+    IN --> RP
+```
 
-## 🌍 Impacto Ambiental del Proyecto
+El detalle de cada módulo está en [DOCUMENTATION.md](DOCUMENTATION.md).
 
-Este proyecto demuestra cómo la optimización algorítmica puede generar un impacto real en la sostenibilidad urbana:
+## Correr localmente
 
-- 🌳 **Reducción de emisiones de CO₂**: Menor contaminación atmosférica.
-- ⛽ **Ahorro de combustible**: Reducción de costos operativos.
-- ⏱️ **Eficiencia operativa**: Menor tiempo de recorrido.
+```bash
+git clone https://github.com/trinity-bytes/green-circuit.git tourbench
+cd tourbench
+python3 -m http.server 8000   # o cualquier servidor estático
+```
 
-Para una ruta de **10 puntos**, los ahorros diarios pueden rondar el **25%** en distancia, tiempo y emisiones de CO₂.
+Abre `http://localhost:8000` (página del proyecto) o `http://localhost:8000/app.html` (la app). Agrega `?seed=7` a la URL de la app para obtener siempre la misma instancia aleatoria.
 
----
+### Pruebas
 
-## 🐛 Solución de Problemas
+```bash
+npm test   # node --test, sin dependencias
+```
 
-- **La página está en blanco**: Espera 2-3 segundos. La biblioteca Cytoscape.js se está cargando desde internet.
-- **Aparece "necesita una pantalla más ancha"**: La aplicación requiere al menos 1024 px de ancho.
-- **La ejecución con N = 11 tarda**: Es esperado (3 628 800 ciclos). Usa la velocidad **Máx** o `Fin` para llegar al resultado.
+Cubren el motor de búsqueda: cantidad de ciclos, óptimo frente a una implementación de referencia, reconstrucción de rutas, grafos sin ciclo hamiltoniano, métricas y la columna Δ del Trace.
 
----
+## Despliegue
 
-## 📄 Licencia
+El sitio es estático: no necesita build. En **Cloudflare Pages**:
 
-Este repositorio se distribuye bajo la [licencia MIT](LICENSE). Úsalo, modifícalo o compártelo citando la fuente original.
+| Ajuste                 | Valor                         |
+| ---------------------- | ----------------------------- |
+| Framework preset       | `None`                        |
+| Build command          | _(vacío)_                     |
+| Build output directory | `/`                           |
+| Dominio personalizado  | `tourbench.jahattrinidad.com` |
 
-### 🌱 GreenCircuit - 2025
+Pages sirve `index.html` en `/` y `app.html` en `/app`.
+
+## Estructura
+
+```text
+├── index.html              # Página del proyecto
+├── app.html                # La app
+├── assets/                 # Sprite de íconos, favicon e imagen social
+├── docs/screenshots/       # Capturas del README
+├── src/
+│   ├── js/                 # Modelo, motor de búsqueda y vistas
+│   └── styles/             # tokens.css, app.css, landing.css, about.css
+└── test/                   # Pruebas del motor (node --test)
+```
+
+## Aviso académico
+
+Este proyecto se publica con fines académicos y de referencia. Puedes inspirarte en él y aprender de él, pero **no me hago responsable por el plagio total o parcial en entregas con calificación**. Si reutilizas partes del proyecto en trabajos evaluados, hazlo bajo tu propio criterio y respetando las políticas de tu institución.
+
+## Licencia
+
+[MIT](LICENSE) © 2025 [Jahat Trinidad](https://jahattrinidad.com) · [@trinity-bytes](https://github.com/trinity-bytes)

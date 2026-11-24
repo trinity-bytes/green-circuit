@@ -200,8 +200,10 @@ a:hover {
   padding: 0 16px;
 }
 .playback > button {
+  flex: none;
   min-width: 24px;
   height: 32px;
+  white-space: nowrap;
 }
 .primary {
   background: var(--text);
@@ -219,6 +221,8 @@ a:hover {
 .progress-label {
   display: flex;
   justify-content: space-between;
+  gap: 12px;
+  white-space: nowrap;
   color: var(--text-meta);
   font: var(--type-mono-s);
   margin-bottom: 8px;
@@ -466,6 +470,17 @@ input {
   overflow: hidden;
   clip-path: inset(50%);
 }
+/* 1024–1279 px: drop secondary labels so the topbar and playback bar fit one line */
+@media (max-width: 1279px) {
+  .wide-only {
+    display: none;
+  }
+  .progress-label #progress-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 /* Notice below 1024 px (Figma 14:670, section 4) */
 @media (max-width: 1023px) {
   .app {
@@ -692,9 +707,11 @@ input {
   min-width: 0;
   padding: 0;
   border: 0;
+  outline: 0;
   background: transparent;
   color: var(--text);
   font: var(--type-mono-m);
+  appearance: textfield;
 }
 
 .trace-scroll {
@@ -708,4 +725,15 @@ input {
   height: var(--spacer-height);
   padding: 0;
   border: 0;
+}
+
+/* Weight field: the label is the visible box; hide the number spinners */
+.edge-input input::-webkit-outer-spin-button,
+.edge-input input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.edge-input:focus-within {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
