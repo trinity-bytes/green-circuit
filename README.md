@@ -42,36 +42,14 @@ Este proyecto se publica con fines académicos y de referencia. El código está
 
 ## 🎯 Cómo Usar la Aplicación
 
-### Paso 1: Configurar el Grafo
+1. Elige el **número de puntos (N)** entre 4 y 11 y un **layout** (Aleatorio, Circular o Cuadrícula).
+2. Pulsa **Ejecutar** (o `Espacio`). Con N ≥ 10 se pide confirmación con el tiempo y la memoria estimados.
+3. Observa el **Inspector**: la ruta en evaluación (azul) con su suma, la mejor encontrada (verde) y la celda activa de la matriz.
+4. Abre el **Trace** (`2`) para ver cada ciclo evaluado, filtrar solo las mejoras y exportar a CSV o JSON.
+5. Al terminar, el **Resultado** muestra la ruta óptima, su tiempo y CO₂, y la comparación con la peor ruta.
+6. **Editar grafo** (`E`) permite mover nodos y cambiar pesos de aristas (doble clic en una arista).
 
-1. Ingresa el **número de puntos de recolección (N)** en el rango de 8 a 16.
-2. Haz clic en **"✅ Configurar"**.
-
-### Paso 2: Generar Puntos de Recolección
-
-Elige uno de los tres modos para distribuir los puntos en el mapa:
-
-- **🎲 Aleatorio**: Distribución aleatoria con separación mínima entre puntos.
-- **⭕ Circular**: Puntos distribuidos uniformemente en un círculo.
-- **⊞ Grid**: Distribución en una cuadrícula regular.
-
-### Paso 3: Configurar Velocidad de Ejecución
-
-Selecciona la velocidad con la que se ejecutará el algoritmo:
-
-- **⚡ Rápido**: Ejecución automática con pausas breves.
-- **🐢 Lento**: 1 segundo por paso (recomendado para N > 10).
-- **👆 Manual**: Avance paso a paso con clics (ideal para presentaciones y depuración).
-
-### Paso 4: Ejecutar el Algoritmo
-
-1. Haz clic en **"▶️ EJECUTAR ALGORITMO"**.
-2. Observa las 4 fases de ejecución en la consola de logs:
-   - **Fase 1**: Construcción de la matriz de adyacencia.
-   - **Fase 2**: Búsqueda de ciclos hamiltonianos.
-   - **Fase 3**: Resolución del problema TSP.
-   - **Fase 4**: Presentación de resultados.
-3. La ruta óptima se destacará en **azul** en el grafo.
+Atajos: `Espacio` ejecutar/pausar · `←`/`→` paso · `Inicio`/`Fin` · `1`/`2` pestañas · `Tab` recorre nodos.
 
 ---
 
@@ -79,27 +57,31 @@ Selecciona la velocidad con la que se ejecutará el algoritmo:
 
 ```text
 📦 GreenCircuit/
-├── 📄 index.html                 # Aplicación principal
-├── 📄 landing.html               # Página de aterrizaje informativa
-├── 📖 README.md                  # Guía rápida y consideraciones de uso
-├── � DOCUMENTATION.md           # Detalle de arquitectura y algoritmos
-├── 📜 LICENSE                    # Licencia MIT del proyecto
+├── 📄 index.html                 # Aplicación (Search Bench)
+├── 📄 landing.html               # Página del proyecto
+├── 📖 README.md
+├── 📖 DOCUMENTATION.md           # Arquitectura y algoritmos
+├── 📦 package.json               # Script de pruebas (node --test)
+├── 📁 assets/icons.svg           # Sprite de íconos
+├── 📁 test/                      # Pruebas del motor de búsqueda
 └── 📁 src/
-    ├── 📁 js/                    # Módulos JavaScript
-    │   ├── app.js                # Controlador principal
-    │   ├── CytoscapeRenderer.js  # Renderizado visual del grafo
+    ├── 📁 js/
+    │   ├── app.js                # Estado, eventos y atajos
     │   ├── Graph.js              # Modelo del grafo y matriz
-    │   ├── GraphEditor.js        # Herramientas de edición manual
-    │   ├── HamiltonianFinder.js  # Búsqueda de ciclos hamiltonianos
-    │   ├── LogDisplay.js         # Sistema de logs y resultados
-    │   ├── RandomGenerator.js    # Generación de puntos y layouts
-    │   └── TSPSolver.js          # Evaluación de ciclos TSP
+    │   ├── RandomGenerator.js    # Layouts de puntos
+    │   ├── SearchEngine.js       # Backtracking en streaming
+    │   ├── markup.js             # Helpers de marcado
+    │   ├── GraphView.js          # Render con Cytoscape.js
+    │   ├── Inspector.js          # Pestaña Inspector
+    │   ├── ResultPanel.js        # Resultado
+    │   ├── TracePanel.js         # Pestaña Trace y exportación
+    │   ├── Playback.js           # Reproducción y confirmación
+    │   ├── EditMode.js           # Modo edición
+    │   └── AppView.js            # Barra superior y reproducción
     └── 📁 styles/
-        ├── main.css              # Estilos base
-        ├── layout.css            # Layout general y patrones
-        ├── components.css        # Componentes reutilizables
-        ├── animations.css        # Animaciones y transiciones
-        └── variables.css         # Sistema de diseño
+        ├── tokens.css            # Paleta y tipografía (Catppuccin Latte)
+        ├── app.css               # Estilos de la aplicación
+        └── landing.css           # Estilos de la landing
 ```
 
 ---
@@ -109,12 +91,11 @@ Selecciona la velocidad con la que se ejecutará el algoritmo:
 El proyecto sigue una arquitectura modular con una clara separación de responsabilidades.
 
 - **`Graph.js`**: Representa el grafo, almacena nodos y aristas, y construye la matriz de adyacencia.
-- **`HamiltonianFinder.js`**: Implementa un algoritmo de **backtracking** para encontrar todos los ciclos hamiltonianos.
-- **`TSPSolver.js`**: Resuelve el TSP mediante **fuerza bruta**, evaluando todos los ciclos hamiltonianos para encontrar el óptimo.
-- **`RandomGenerator.js`**: Genera los datos de los puntos de recolección en los modos aleatorio, circular y grid.
-- **`CytoscapeRenderer.js`**: Utiliza la biblioteca **Cytoscape.js** para renderizar el grafo de forma interactiva.
-- **`LogDisplay.js`**: Muestra información detallada del proceso en la interfaz de usuario.
-- **`app.js`**: Orquesta todos los componentes y maneja el flujo principal de la aplicación.
+- **`SearchEngine.js`**: Implementa el **backtracking** desde A y evalúa cada ciclo por **fuerza bruta** sin guardar las rutas: solo el costo de cada ciclo en un `Float32Array`. La ruta de cualquier ciclo se reconstruye desde su índice.
+- **`RandomGenerator.js`**: Genera los puntos en los modos aleatorio, circular y cuadrícula.
+- **`GraphView.js`**: Utiliza **Cytoscape.js** para renderizar el grafo y resaltar la ruta en evaluación y la mejor.
+- **`Inspector.js`, `TracePanel.js`, `ResultPanel.js`, `Playback.js`, `EditMode.js`, `AppView.js`**: Vistas de la interfaz.
+- **`app.js`**: Estado compartido, cableado de eventos y atajos de teclado.
 
 ---
 
@@ -126,7 +107,7 @@ El proyecto sigue una arquitectura modular con una clara separación de responsa
 | Resolución TSP (fuerza bruta)    | **O(n!)**     | Evalúa la distancia de todos los ciclos.            |
 | Construcción del grafo completo  | **O(n²)**     | Genera n(n-1)/2 aristas para un grafo completo.     |
 
-**⚠️ Importante:** Debido a la complejidad factorial, se recomienda usar el modo **🐢 Lento** o **👆 Manual** para N > 12 para evitar que el navegador se congele.
+**⚠️ Importante:** Por la complejidad factorial, la aplicación limita N a 11 (3 628 800 ciclos). Con N = 12 serían casi 40 millones de ciclos.
 
 ---
 
@@ -145,8 +126,8 @@ Para una ruta de **10 puntos**, los ahorros diarios pueden rondar el **25%** en 
 ## 🐛 Solución de Problemas
 
 - **La página está en blanco**: Espera 2-3 segundos. La biblioteca Cytoscape.js se está cargando desde internet.
-- **No se muestra el grafo**: Asegúrate de haber completado los pasos 1 (Configurar) y 2 (Generar).
-- **El navegador se congela**: El número de puntos (N) es muy grande. Usa N ≤ 10 para pruebas rápidas o cambia al modo **🐢 Lento**.
+- **Aparece "necesita una pantalla más ancha"**: La aplicación requiere al menos 1024 px de ancho.
+- **La ejecución con N = 11 tarda**: Es esperado (3 628 800 ciclos). Usa la velocidad **Máx** o `Fin` para llegar al resultado.
 
 ---
 

@@ -5,8 +5,8 @@
 
 class Graph {
   constructor(n) {
-    if (n < 4 || n > 16) {
-      throw new Error("N debe estar entre 4 y 16");
+    if (n < 4 || n > 11) {
+      throw new Error("N debe estar entre 4 y 11");
     }
 
     this.n = n;
@@ -17,8 +17,8 @@ class Graph {
 
   addNode(node) {
     // Ajustar el límite dinámicamente si es necesario
-    if (this.nodes.length >= 16) {
-      throw new Error(`No se pueden agregar más de 16 nodos`);
+    if (this.nodes.length >= 11) {
+      throw new Error(`No se pueden agregar más de 11 nodos`);
     }
 
     if (this.nodes.find((n) => n.id === node.id)) {
@@ -61,14 +61,10 @@ class Graph {
     }
 
     const normalizedDistance = parseFloat(distance.toFixed(2));
-    const normalizedTime = parseFloat(
-      ((normalizedDistance / 25) * 60).toFixed(2)
-    );
+    const normalizedTime = parseFloat(((normalizedDistance / 25) * 60).toFixed(2));
 
     const existingEdge = this.edges.find(
-      (edge) =>
-        (edge.from === from && edge.to === to) ||
-        (edge.from === to && edge.to === from)
+      (edge) => (edge.from === from && edge.to === to) || (edge.from === to && edge.to === from),
     );
 
     if (existingEdge) {
@@ -126,15 +122,13 @@ class Graph {
 
   hasEdge(from, to) {
     return this.edges.some(
-      (e) =>
-        (e.from === from && e.to === to) || (e.from === to && e.to === from)
+      (e) => (e.from === from && e.to === to) || (e.from === to && e.to === from),
     );
   }
 
   getDistance(from, to) {
     const edge = this.edges.find(
-      (e) =>
-        (e.from === from && e.to === to) || (e.from === to && e.to === from)
+      (e) => (e.from === from && e.to === to) || (e.from === to && e.to === from),
     );
     return edge ? edge.distance : null;
   }
@@ -145,10 +139,7 @@ class Graph {
     const uniqueEdges = new Set();
 
     this.edges.forEach((edge) => {
-      const key =
-        edge.from < edge.to
-          ? `${edge.from}-${edge.to}`
-          : `${edge.to}-${edge.from}`;
+      const key = edge.from < edge.to ? `${edge.from}-${edge.to}` : `${edge.to}-${edge.from}`;
       uniqueEdges.add(key);
     });
 

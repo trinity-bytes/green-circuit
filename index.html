@@ -1,498 +1,211 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GreenCircuit - Optimización de Rutas de Recolección</title>
-    <meta
-      name="description"
-      content="Optimización de rutas de recolección de residuos urbanos usando el Problema del Agente Viajero (TSP)"
-    />
-
-    <link rel="icon" type="image/png" href="assets/leaf-icon.png" />
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="src/styles/main.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css"
-    />
-
-    <!-- Cytoscape.js desde CDN -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>GreenCircuit — Search Bench</title>
+    <link rel="stylesheet" href="src/styles/tokens.css" />
+    <link rel="stylesheet" href="src/styles/app.css" />
     <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
   </head>
-
   <body>
-    <!-- CONTENEDOR PRINCIPAL DE LA APP -->
-    <div class="app-container">
-      <!-- HEADER CON WIZARD INTEGRADO -->
-      <header class="app-header">
-        <div class="app-logo">
-          <span class="app-logo-icon">
-            <img
-              src="assets/leaf-icon.png"
-              alt="GreenCircuit"
-              width="44"
-              height="44"
-            />
-          </span>
-          <span class="app-logo-text">GreenCircuit</span>
+    <div class="small-screen">
+      <svg class="icon" width="24" height="24" aria-hidden="true">
+        <use href="assets/icons.svg#brand-mark"></use>
+      </svg>
+      <h1>GreenCircuit necesita una pantalla más ancha</h1>
+      <p>
+        El grafo, la matriz y el trace no caben por debajo de 1024 px. Mientras tanto, puedes leer
+        cómo funciona.
+      </p>
+      <a href="landing.html">
+        <svg class="icon" width="16" height="16" aria-hidden="true">
+          <use href="assets/icons.svg#icon-arrow-up-right"></use>
+        </svg>
+        Ver la página del proyecto
+      </a>
+    </div>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <svg class="icon" width="24" height="24" aria-hidden="true">
+            <use href="assets/icons.svg#brand-mark"></use></svg
+          ><strong>GreenCircuit</strong>
         </div>
-
-        <!-- WIZARD PROGRESS EN HEADER -->
-        <div class="wizard-progress-header">
-          <div class="wizard-steps">
-            <div class="wizard-step active" data-step="1">
-              <div class="wizard-step-number">1</div>
-              <div class="wizard-step-label">Configuración</div>
+        <span class="divider"></span><span class="caps">N</span>
+        <div class="stepper">
+          <button id="minus" aria-label="Reducir número de nodos">−</button
+          ><output id="node-count">8</output
+          ><button id="plus" aria-label="Aumentar número de nodos">
+            <svg class="icon" width="16" height="16" aria-hidden="true">
+              <use href="assets/icons.svg#icon-plus"></use>
+            </svg>
+          </button>
+        </div>
+        <span class="meta mono">4–11</span><span class="caps">LAYOUT</span>
+        <div class="segments" id="layouts">
+          <button data-layout="random" class="selected">Aleatorio</button
+          ><button data-layout="circular">Circular</button
+          ><button data-layout="grid">Cuadrícula</button>
+        </div>
+        <button class="icon-button" id="regenerate" aria-label="Regenerar grafo">
+          <svg class="icon" width="16" height="16" aria-hidden="true">
+            <use href="assets/icons.svg#icon-regenerate"></use>
+          </svg></button
+        ><button id="edit">✎ &nbsp; Editar grafo</button>
+        <div class="grow"></div>
+        <span class="mono" id="complexity"></span
+        ><button id="restart" hidden>
+          <svg class="icon" width="16" height="16" aria-hidden="true">
+            <use href="assets/icons.svg#icon-regenerate"></use>
+          </svg>
+          Reiniciar</button
+        ><span class="divider"></span><a href="landing.html">Acerca del proyecto</a
+        ><a
+          href="https://github.com/trinity-bytes/green-circuit"
+          aria-label="Código fuente en GitHub"
+          ><svg class="icon" width="16" height="16" aria-hidden="true">
+            <use href="assets/icons.svg#icon-github"></use></svg
+        ></a>
+      </header>
+      <main class="body">
+        <section class="stage">
+          <div class="canvas">
+            <div class="canvas-meta">
+              <div class="caps" id="instance"></div>
+              <p id="canvas-help">
+                Arrastra un nodo para moverlo · doble clic en una arista para editar su peso
+              </p>
+              <div id="tools" hidden>
+                <button data-tool="select">
+                  <svg class="icon" width="16" height="16" aria-hidden="true">
+                    <use href="assets/icons.svg#icon-cursor"></use>
+                  </svg>
+                  Seleccionar</button
+                ><button data-tool="node">
+                  <svg class="icon" width="16" height="16" aria-hidden="true">
+                    <use href="assets/icons.svg#icon-node-add"></use>
+                  </svg>
+                  Nodo</button
+                ><button data-tool="edge">
+                  <svg class="icon" width="16" height="16" aria-hidden="true">
+                    <use href="assets/icons.svg#icon-link"></use>
+                  </svg>
+                  Arista</button
+                ><button data-tool="delete">
+                  <svg class="icon" width="16" height="16" aria-hidden="true">
+                    <use href="assets/icons.svg#icon-trash"></use>
+                  </svg>
+                  Eliminar</button
+                ><span class="meta">V · N · A · Supr</span>
+              </div>
             </div>
-            <div class="wizard-step-line"></div>
-            <div class="wizard-step" data-step="2">
-              <div class="wizard-step-number">2</div>
-              <div class="wizard-step-label">Generación</div>
-            </div>
-            <div class="wizard-step-line"></div>
-            <div class="wizard-step" data-step="3">
-              <div class="wizard-step-number">3</div>
-              <div class="wizard-step-label">Visualización</div>
-            </div>
-            <div class="wizard-step-line"></div>
-            <div class="wizard-step" data-step="4">
-              <div class="wizard-step-number">4</div>
-              <div class="wizard-step-label">Ejecución</div>
+            <div id="graph" aria-label="Grafo de rutas"></div>
+            <div id="graph-access" class="sr-only" aria-label="Nodos del grafo"></div>
+            <div id="legend" class="legend"></div>
+            <div class="zoom">
+              <button id="zoom-in" aria-label="Acercar">
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-zoom-in"></use>
+                </svg></button
+              ><button id="zoom-out" aria-label="Alejar">
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-zoom-out"></use>
+                </svg></button
+              ><button id="fit" aria-label="Ajustar vista">
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-fit"></use>
+                </svg>
+              </button>
             </div>
           </div>
-        </div>
-
-        <div class="flex items-center gap-4">
-          <a
-            href="https://github.com/trinity-bytes/GreenCircuit"
-            class="btn btn-ghost btn-sm"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <svg
-              class="icon"
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
-            >
-              <path
-                fill="currentColor"
-                d="M12 2a10 10 0 0 0-3.16 19.48c.5.09.68-.22.68-.48 0-.24-.01-.87-.01-1.71-2.78.6-3.37-1.34-3.37-1.34-.45-1.15-1.11-1.46-1.11-1.46-.9-.62.07-.61.07-.61 1 .07 1.54 1.03 1.54 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.28.1-2.66 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.41.1 2.66.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.86 0 1.34-.01 2.42-.01 2.75 0 .27.18.58.69.48A10 10 0 0 0 12 2"
-              />
-            </svg>
-            <span>Ver código fuente</span>
-          </a>
-          <a href="landing.html" class="btn btn-outline btn-sm">
-            <i class="fi fi-rr-info icon" aria-hidden="true"></i>
-            <span>Más información</span>
-          </a>
-        </div>
-      </header>
-
-      <!-- MAIN CONTENT CENTRADO -->
-      <main class="app-main app-main--scroll">
-        <div class="container-narrow">
-          <!-- SECCIÓN 1: CONFIGURACIÓN -->
-          <section
-            id="config-section"
-            class="content-section animate-fade-in-up delay-200"
-          >
-            <div class="section-header">
-              <div>
-                <div class="section-heading">
-                  <div class="section-step-badge">1</div>
-                  <h2 class="section-title">Configuración del Grafo</h2>
-                </div>
-                <p class="section-subtitle section-subtitle-offset">
-                  Define el número de puntos de recolección para optimizar
-                </p>
-              </div>
-            </div>
-
-            <div class="card mt-6">
-              <div class="card-body">
-                <div class="form-group">
-                  <label for="input-n" class="form-label">
-                    <strong
-                      >¿Cuántos puntos de recolección deseas optimizar?</strong
-                    >
-                  </label>
-                  <div class="flex items-center gap-4">
-                    <input
-                      type="number"
-                      id="input-n"
-                      class="form-input form-input--counter"
-                      min="4"
-                      max="16"
-                      value="8"
-                      placeholder="Ej: 8"
-                    />
-                    <span class="text-secondary text-sm"
-                      >puntos (entre 4 y 16)</span
-                    >
-                  </div>
-                  <small class="form-helper flex items-start gap-2">
-                    <i class="fi fi-rr-bulb icon" aria-hidden="true"></i>
-                    <span>
-                      <strong>Recomendación:</strong> Comienza con 10 puntos
-                      para una ejecución rápida. Valores mayores a 12 pueden
-                      tardar varios segundos.
-                    </span>
-                  </small>
-                </div>
-
-                <button id="btn-config" class="btn btn-primary btn-lg w-full">
-                  <i class="fi fi-rr-check-circle icon" aria-hidden="true"></i>
-                  <span>Continuar</span>
-                </button>
-              </div>
-            </div>
-
-            <div id="config-status" class="mt-4"></div>
-          </section>
-
-          <!-- SECCIÓN 2: GENERACIÓN (Inicialmente oculta) -->
-          <section id="generation-section" class="content-section hidden">
-            <div class="section-header">
-              <div>
-                <div class="section-heading">
-                  <div class="section-step-badge">2</div>
-                  <h2 class="section-title">Generación del Grafo</h2>
-                </div>
-                <p class="section-subtitle section-subtitle-offset">
-                  Elige cómo distribuir los puntos en el mapa
-                </p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-3 gap-4 mt-6">
-              <button id="btn-random" class="card hover-lift">
-                <div class="card-emoji">
-                  <i class="fi fi-rr-dice" aria-hidden="true"></i>
-                </div>
-                <h3 class="card-heading">Aleatorio</h3>
-                <p class="card-description">
-                  Distribución aleatoria con separación mínima
-                </p>
-              </button>
-
-              <button id="btn-random-circular" class="card hover-lift">
-                <div class="card-emoji">
-                  <i class="fi fi-rr-circle" aria-hidden="true"></i>
-                </div>
-                <h3 class="card-heading">Circular</h3>
-                <p class="card-description">
-                  Puntos distribuidos en un círculo uniforme
-                </p>
-              </button>
-
-              <button id="btn-random-grid" class="card hover-lift">
-                <div class="card-emoji">
-                  <i class="fi fi-rr-grid" aria-hidden="true"></i>
-                </div>
-                <h3 class="card-heading">Grid</h3>
-                <p class="card-description">
-                  Distribución en cuadrícula regular
-                </p>
-              </button>
-            </div>
-
-            <div id="generation-status" class="mt-4"></div>
-          </section>
-          <!-- SECCIÓN 3: VISUALIZACIÓN DEL GRAFO -->
-          <section id="visualization-section" class="content-section hidden">
-            <div class="section-header">
-              <div>
-                <div class="section-heading">
-                  <div class="section-step-badge">3</div>
-                  <h2 class="section-title">Visualización del Grafo</h2>
-                </div>
-                <p class="section-subtitle section-subtitle-offset">
-                  Explora y edita el grafo generado
-                </p>
-              </div>
-            </div>
-
-            <div id="graph-info" class="card card-gradient mb-4 hidden">
-              <div class="card-body">
-                <div id="graph-stats"></div>
-              </div>
-            </div>
-
-            <div class="graph-wrapper mt-6">
-              <div id="graph-container"></div>
-
-              <!-- Toolbar flotante -->
-              <div class="floating-toolbar">
-                <button
-                  id="btn-fit-view"
-                  class="btn btn-icon btn-ghost"
-                  title="Ajustar vista"
-                >
-                  <i class="fi fi-rr-search icon" aria-hidden="true"></i>
-                </button>
-                <button
-                  id="btn-reset-view"
-                  class="btn btn-icon btn-ghost"
-                  title="Resetear vista"
-                >
-                  <i class="fi fi-rr-rotate-right icon" aria-hidden="true"></i>
-                </button>
-                <div class="toolbar-divider"></div>
-                <button
-                  id="btn-toggle-edit"
-                  class="btn btn-sm btn-warning"
-                  title="Activar modo edición"
-                >
-                  <i class="fi fi-rr-pencil icon" aria-hidden="true"></i>
-                  <span>Editar</span>
-                </button>
-                <button
-                  id="btn-clear-graph"
-                  class="btn btn-icon btn-danger hidden"
-                  title="Limpiar grafo"
-                >
-                  <i class="fi fi-rr-trash icon" aria-hidden="true"></i>
-                </button>
-              </div>
-            </div>
-
-            <div
-              id="edit-mode-info"
-              class="info-box info-box-warning mt-4 hidden"
-            >
-              <strong>
-                <i class="fi fi-rr-pencil icon" aria-hidden="true"></i>
-                <span>Modo edición activo</span>
-              </strong>
-              <ul class="list-relaxed">
-                <li>
-                  <strong>Click en el canvas</strong> → Agregar un nodo nuevo
-                </li>
-                <li>
-                  <strong>Click derecho en un nodo</strong> → Eliminar nodo
-                </li>
-                <li>
-                  <strong>Click en dos nodos</strong> → Conectar y asignar peso
-                </li>
-                <li><strong>Click en una arista</strong> → Cambiar su peso</li>
-                <li><strong>Límite:</strong> Máximo 16 nodos permitidos</li>
-              </ul>
-            </div>
-
-            <button
-              id="btn-continue-execution"
-              class="btn btn-primary btn-lg w-full mt-6 hidden"
-            >
-              <span>Continuar</span>
-              <i class="fi fi-rr-arrow-right icon" aria-hidden="true"></i>
+          <footer class="playback">
+            <button id="first" aria-label="Primer ciclo">
+              <svg class="icon" width="16" height="16" aria-hidden="true">
+                <use href="assets/icons.svg#icon-skip-start"></use>
+              </svg></button
+            ><button id="prev" aria-label="Ciclo anterior">
+              <svg class="icon" width="16" height="16" aria-hidden="true">
+                <use href="assets/icons.svg#icon-chevron-left"></use>
+              </svg></button
+            ><button class="primary" id="play">▷ &nbsp; Ejecutar</button
+            ><button id="next" aria-label="Ciclo siguiente">
+              <svg class="icon" width="16" height="16" aria-hidden="true">
+                <use href="assets/icons.svg#icon-chevron-right"></use>
+              </svg></button
+            ><button id="last" aria-label="Último ciclo">
+              <svg class="icon" width="16" height="16" aria-hidden="true">
+                <use href="assets/icons.svg#icon-skip-end"></use>
+              </svg>
             </button>
-          </section>
-
-          <!-- SECCIÓN 4: CONTROLES DE EJECUCIÓN (Inicialmente oculta) -->
-          <section id="controls-section" class="content-section hidden">
-            <div class="section-header">
-              <div>
-                <div class="section-heading">
-                  <div class="section-step-badge">4</div>
-                  <h2 class="section-title">Ejecutar Algoritmo TSP</h2>
-                </div>
-                <p class="section-subtitle section-subtitle-offset">
-                  Configura la velocidad y ejecuta la optimización
-                </p>
+            <div class="progress">
+              <div class="progress-label">
+                <span id="progress-text"></span><span id="improvement-count">sin mejoras aún</span>
+              </div>
+              <div class="track" id="track">
+                <div id="progress-fill"></div>
+                <div id="ticks"></div>
+                <div id="playhead"></div>
               </div>
             </div>
-
-            <div class="card mt-6">
-              <div class="card-body">
-                <label class="form-label mb-4">
-                  <strong class="flex items-center gap-2">
-                    <i class="fi fi-rr-bolt icon" aria-hidden="true"></i>
-                    <span>Velocidad de ejecución</span>
-                  </strong>
-                </label>
-
-                <div class="speed-options mb-6">
-                  <label class="speed-option">
-                    <input
-                      type="radio"
-                      name="speed"
-                      value="fast"
-                      id="speed-fast"
-                      class="input-hidden"
-                    />
-                    <div class="speed-card" data-speed="fast" id="btn-fast">
-                      <div class="speed-icon">
-                        <i class="fi fi-rr-bolt icon-lg" aria-hidden="true"></i>
-                      </div>
-                      <div class="speed-name">Rápido</div>
-                      <div class="speed-desc">500ms/paso</div>
-                    </div>
-                  </label>
-
-                  <label class="speed-option">
-                    <input
-                      type="radio"
-                      name="speed"
-                      value="slow"
-                      id="speed-slow"
-                      checked
-                      class="input-hidden"
-                    />
-                    <div
-                      class="speed-card active"
-                      data-speed="slow"
-                      id="btn-slow"
-                    >
-                      <div class="speed-icon">
-                        <i
-                          class="fi fi-rr-hourglass icon-lg"
-                          aria-hidden="true"
-                        ></i>
-                      </div>
-                      <div class="speed-name">Lento</div>
-                      <div class="speed-desc">1s/paso</div>
-                    </div>
-                  </label>
-
-                  <label class="speed-option">
-                    <input
-                      type="radio"
-                      name="speed"
-                      value="manual"
-                      id="speed-manual"
-                      class="input-hidden"
-                    />
-                    <div
-                      class="speed-card"
-                      data-speed="manual"
-                      id="btn-manual-step"
-                    >
-                      <div class="speed-icon">
-                        <i
-                          class="fi fi-rr-hand-pointer icon-lg"
-                          aria-hidden="true"
-                        ></i>
-                      </div>
-                      <div class="speed-name">Manual</div>
-                      <div class="speed-desc">Click/paso</div>
-                    </div>
-                  </label>
-                </div>
-
-                <div class="info-box info-box-warning mb-6">
-                  <strong class="flex items-center gap-2">
-                    <i
-                      class="fi fi-rr-triangle-warning icon"
-                      aria-hidden="true"
-                    ></i>
-                    <span>Recomendación</span>
-                  </strong>
-                  <span>
-                    Para N &gt; 10, usa modo <strong>Lento</strong> o
-                    <strong>Manual</strong> para evitar congelamiento.
-                  </span>
-                </div>
-
-                <div id="manual-controls" class="hidden mb-6">
-                  <button id="btn-next-step" class="btn btn-outline w-full">
-                    <span>Siguiente paso</span>
-                    <i class="fi fi-rr-arrow-right icon" aria-hidden="true"></i>
-                  </button>
-                </div>
-
-                <button id="btn-execute" class="btn btn-xl w-full">
-                  <i class="fi fi-rr-play icon" aria-hidden="true"></i>
-                  <span>Ejecutar algoritmo</span>
-                </button>
-              </div>
+            <span class="caps">VELOCIDAD</span>
+            <div class="segments" id="speeds">
+              <button data-speed="1">1×</button>
+              <button data-speed="10" class="selected">10×</button>
+              <button data-speed="100">100×</button>
+              <button data-speed="max">Máx</button>
             </div>
-
-            <div id="execution-status" class="mt-4"></div>
-
-            <div id="progress-container" class="hidden mt-6">
-              <div class="progress-bar">
-                <div class="progress-fill" id="progress-fill"></div>
-              </div>
-              <div id="progress-text" class="progress-text">Progreso: 0%</div>
-            </div>
-          </section>
-
-          <!-- SECCIÓN 5: LOGS Y RESULTADOS (Inicialmente oculta) -->
-          <section id="results-section" class="content-section hidden">
-            <div class="section-header">
-              <div class="flex-1">
-                <div class="section-heading">
-                  <div class="section-step-badge section-step-badge-success">
-                    <i class="fi fi-rr-check icon" aria-hidden="true"></i>
-                  </div>
-                  <h2 class="section-title">Resultados</h2>
-                </div>
-                <p class="section-subtitle section-subtitle-offset">
-                  Registro detallado de la ejecución y métricas obtenidas
-                </p>
-              </div>
-              <button id="btn-clear-logs" class="btn btn-outline btn-sm">
-                <i class="fi fi-rr-trash icon" aria-hidden="true"></i>
-                <span>Limpiar</span>
-              </button>
-            </div>
-
-            <div class="logs-wrapper mt-6">
-              <div class="logs-header">
-                <span
-                  class="font-bold text-success-light flex items-center gap-2"
-                >
-                  <i class="fi fi-rr-clipboard icon" aria-hidden="true"></i>
-                  <span>Terminal</span>
-                </span>
-                <span class="text-xs text-neutral-400">
-                  GreenCircuit v2.0
-                </span>
-              </div>
-              <div id="log-container"></div>
-            </div>
-          </section>
-        </div>
+          </footer>
+        </section>
+        <aside class="sidebar">
+          <div class="tabs" role="tablist">
+            <button role="tab" id="inspector-tab" aria-selected="true">Inspector</button
+            ><button role="tab" id="trace-tab" aria-selected="false">
+              Trace <span id="trace-count"></span>
+            </button>
+          </div>
+          <div id="inspector" class="panel"></div>
+          <div id="trace" class="panel" hidden></div>
+        </aside>
       </main>
-
-      <!-- FOOTER COMPACTO -->
-      <footer class="app-footer app-footer--compact">
-        <div>
-          <p class="text-secondary mb-0 flex items-center gap-2">
-            <i class="fi fi-rr-leaf icon" aria-hidden="true"></i>
-            <span
-              ><strong>GreenCircuit</strong> - Optimización de Rutas TSP ·
-              2025</span
-            >
-          </p>
-        </div>
-      </footer>
     </div>
-    <!-- Fin del app-container -->
-
-    <div
-      id="toast-stack"
-      class="toast-stack"
-      aria-live="polite"
-      aria-atomic="true"
-    ></div>
-
-    <!-- JavaScript - Orden de carga importante (clases primero, luego app.js) -->
+    <dialog id="confirm">
+      <h2 id="confirm-title">Ejecutar con N = 11</h2>
+      <p>
+        Se evaluarán todos los ciclos hamiltonianos que parten de A. Puedes pausar o detener en
+        cualquier momento; la mejor ruta encontrada hasta ese punto se conserva.
+      </p>
+      <div id="confirm-stats"></div>
+      <div class="dialog-actions">
+        <button id="cancel">Cancelar</button
+        ><button class="primary" id="confirm-run">Ejecutar</button>
+      </div>
+    </dialog>
+    <dialog id="edge-dialog">
+      <h2 id="edge-title">ARISTA</h2>
+      <label class="edge-input" for="edge-weight">
+        <span>w =</span>
+        <input id="edge-weight" type="number" min="0.01" step="0.01" />
+        <span>km</span>
+      </label>
+      <p id="edge-position" class="mono meta"></p>
+      <div class="dialog-actions">
+        <button id="edge-cancel">Restaurar</button
+        ><button class="primary" id="edge-apply">Aplicar</button>
+      </div>
+    </dialog>
+    <div class="sr-only" id="announcement" aria-live="polite"></div>
     <script src="src/js/Graph.js"></script>
     <script src="src/js/RandomGenerator.js"></script>
-    <script src="src/js/HamiltonianFinder.js"></script>
-    <script src="src/js/TSPSolver.js"></script>
-    <script src="src/js/CytoscapeRenderer.js"></script>
-    <script src="src/js/LogDisplay.js"></script>
-    <script src="src/js/GraphEditor.js"></script>
+    <script src="src/js/SearchEngine.js"></script>
+    <script src="src/js/markup.js"></script>
+    <script src="src/js/GraphView.js"></script>
+    <script src="src/js/EditMode.js"></script>
+    <script src="src/js/ResultPanel.js"></script>
+    <script src="src/js/Inspector.js"></script>
+    <script src="src/js/TracePanel.js"></script>
+    <script src="src/js/Playback.js"></script>
+    <script src="src/js/AppView.js"></script>
     <script src="src/js/app.js"></script>
   </body>
 </html>

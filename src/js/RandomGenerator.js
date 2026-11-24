@@ -26,7 +26,15 @@ class RandomGenerator {
   ];
 
   static generate(n, options = {}) {
-    const { width = 800, height = 600 } = options;
+    const { width = 800, height = 600, seed } = options;
+    let value = seed >>> 0;
+    const random =
+      seed === undefined
+        ? Math.random
+        : () => {
+            value = (Math.imul(value, 1664525) + 1013904223) >>> 0;
+            return value / 4294967296;
+          };
 
     if (n < 4 || n > 16) {
       throw new Error("N debe estar entre 4 y 16");
@@ -41,8 +49,8 @@ class RandomGenerator {
       const minDistance = Math.min(width, height) / (n / 2);
 
       do {
-        x = Math.random() * (width - 100) + 50;
-        y = Math.random() * (height - 100) + 50;
+        x = random() * (width - 100) + 50;
+        y = random() * (height - 100) + 50;
 
         tooClose = nodes.some((node) => {
           const dx = node.x - x;
@@ -56,14 +64,13 @@ class RandomGenerator {
 
       let name;
       do {
-        const zoneName =
-          this.ZONE_NAMES[Math.floor(Math.random() * this.ZONE_NAMES.length)];
+        const zoneName = this.ZONE_NAMES[Math.floor(random() * this.ZONE_NAMES.length)];
         const letter = String.fromCharCode(65 + i);
         name = `Punto ${letter} - ${zoneName}`;
       } while (usedNames.has(name));
       usedNames.add(name);
 
-      const rand = Math.random();
+      const rand = random();
       let type;
       if (rand < 0.6) {
         type = "residencial";
@@ -75,11 +82,11 @@ class RandomGenerator {
 
       let wasteAmount;
       if (type === "residencial") {
-        wasteAmount = Math.floor(Math.random() * (50 - 20 + 1)) + 20;
+        wasteAmount = Math.floor(random() * (50 - 20 + 1)) + 20;
       } else if (type === "comercial") {
-        wasteAmount = Math.floor(Math.random() * (80 - 40 + 1)) + 40;
+        wasteAmount = Math.floor(random() * (80 - 40 + 1)) + 40;
       } else {
-        wasteAmount = Math.floor(Math.random() * (120 - 60 + 1)) + 60;
+        wasteAmount = Math.floor(random() * (120 - 60 + 1)) + 60;
       }
 
       nodes.push({
@@ -110,8 +117,7 @@ class RandomGenerator {
       const x = centerX + radius * Math.cos(angle);
       const y = centerY + radius * Math.sin(angle);
 
-      const type =
-        this.WASTE_TYPES[Math.floor(Math.random() * this.WASTE_TYPES.length)];
+      const type = this.WASTE_TYPES[Math.floor(Math.random() * this.WASTE_TYPES.length)];
       const wasteAmount = Math.floor(Math.random() * (100 - 20 + 1)) + 20;
       const zoneName = this.ZONE_NAMES[i % this.ZONE_NAMES.length];
 
@@ -149,8 +155,7 @@ class RandomGenerator {
       const x = 50 + col * cellWidth + cellWidth / 2;
       const y = 50 + row * cellHeight + cellHeight / 2;
 
-      const type =
-        this.WASTE_TYPES[Math.floor(Math.random() * this.WASTE_TYPES.length)];
+      const type = this.WASTE_TYPES[Math.floor(Math.random() * this.WASTE_TYPES.length)];
       const wasteAmount = Math.floor(Math.random() * (100 - 20 + 1)) + 20;
       const zoneName = this.ZONE_NAMES[i % this.ZONE_NAMES.length];
 
@@ -202,8 +207,7 @@ class RandomGenerator {
         totalWaste: nodesOfType.reduce((sum, n) => sum + n.wasteAmount, 0),
         avgWaste:
           nodesOfType.length > 0
-            ? nodesOfType.reduce((sum, n) => sum + n.wasteAmount, 0) /
-              nodesOfType.length
+            ? nodesOfType.reduce((sum, n) => sum + n.wasteAmount, 0) / nodesOfType.length
             : 0,
       };
     });

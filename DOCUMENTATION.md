@@ -2,87 +2,80 @@
 
 ## Visión General
 
-GreenCircuit es una aplicación web (HTML, CSS y JavaScript) enfocada en optimizar rutas de recolección de residuos urbanos. Todo el procesamiento sucede en el navegador; no existe backend. El flujo principal guía al usuario por etapas para configurar el grafo, generar nodos, visualizar el resultado y ejecutar el algoritmo TSP.
+GreenCircuit es una aplicación web (HTML, CSS y JavaScript sin frameworks) que resuelve el problema del agente viajero (TSP) por fuerza bruta para optimizar rutas de recolección de residuos. Todo corre en el navegador; no hay backend. La interfaz ("Search Bench") muestra en vivo la ruta evaluada, su suma parcial, la mejor ruta encontrada y la celda de la matriz que la produce.
 
 ## Arquitectura de Código
 
-El código JavaScript se organiza en módulos especializados, orquestados desde `src/js/app.js`:
+Cada módulo es una clase global cargada con `<script>` en `index.html`. Los algoritmos no conocen la interfaz.
 
-| Módulo                 | Rol principal                                                           |
-| ---------------------- | ----------------------------------------------------------------------- |
-| `Graph.js`             | Modelo del grafo: nodos, aristas, matriz de adyacencia y métricas.      |
-| `RandomGenerator.js`   | Genera nodos y layouts (aleatorio, circular, grid) y completa aristas.  |
-| `HamiltonianFinder.js` | Backtracking para obtener todos los ciclos hamiltonianos.               |
-| `TSPSolver.js`         | Evalúa los ciclos y calcula la ruta óptima, peor ruta y ahorros.        |
-| `CytoscapeRenderer.js` | Renderiza y estiliza el grafo con Cytoscape.js.                         |
-| `GraphEditor.js`       | Modo edición: agrega nodos, conecta aristas y ajusta pesos manualmente. |
-| `LogDisplay.js`        | Consola visual de eventos, matrices y resultados.                       |
-
-### Estado Global (`app.js`)
-
-`app.js` mantiene el estado común (grafo, renderer, logger, modo de ejecución, flags de progreso) y conecta los eventos de UI con las funciones de negocio.
+| Módulo               | Rol principal                                                                 |
+| -------------------- | ----------------------------------------------------------------------------- |
+| `Graph.js`           | Modelo del grafo: nodos, aristas y matriz de adyacencia.                      |
+| `RandomGenerator.js` | Layouts aleatorio (con semilla opcional), circular y cuadrícula.              |
+| `SearchEngine.js`    | Backtracking en streaming: evalúa ciclos, mejor/peor ruta, mejoras, métricas. |
+| `markup.js`          | Helpers de marcado compartidos (secciones, estadísticas, íconos).             |
+| `GraphView.js`       | Renderizado con Cytoscape.js, resaltado de rutas y nodos accesibles por Tab.  |
+| `Inspector.js`       | Pestaña Inspector: pasos, ruta actual, mejor ruta, matriz y modelo.           |
+| `ResultPanel.js`     | Resultado: ruta óptima, métricas, comparación con la peor ruta y mejoras.     |
+| `TracePanel.js`      | Pestaña Trace: tabla virtualizada, filtro de mejoras y exportación CSV/JSON.  |
+| `Playback.js`        | Bucle de animación, velocidad, pasos y diálogo de confirmación (N ≥ 10).      |
+| `EditMode.js`        | Herramientas de edición y popover de peso de arista.                          |
+| `AppView.js`         | Barra superior, leyenda y barra de reproducción.                              |
+| `app.js`             | Estado compartido, cableado de eventos y atajos de teclado.                   |
 
 ## Flujo del Algoritmo
 
-1. **Configuración**: el usuario define \(N\) (entre 8 y 16). Se crea un grafo vacío y se inicializa el editor.
-2. **Generación**: se generan nodos mediante `RandomGenerator` y se completa el grafo (aristas con distancias euclidianas). `CytoscapeRenderer` actualiza la vista.
-3. **Visualización / Edición manual**: el usuario puede editar el grafo (nuevos nodos, eliminar, cambiar pesos). `GraphEditor` mantiene sincronía con `Graph` y actualiza estadísticas.
-4. **Ejecución**: `HamiltonianFinder` obtiene todos los ciclos hamiltonianos; `TSPSolver` calcula métricas (distancia total, tiempo estimado, emisiones) y selecciona la ruta óptima. Los resultados se muestran en la consola visual y se resalta la ruta en el grafo.
+1. **Fase 1 — Matriz**: al generar el grafo se precalcula `w(i, j)` (distancia euclidiana · 0.01 km) para consultas O(1).
+2. **Fase 2 — Backtracking desde A**: `SearchEngine` enumera las permutaciones de los nodos restantes en orden lexicográfico, sin guardar las rutas. Solo guarda el costo de cada ciclo en un `Float32Array` de longitud (N−1)!.
+3. **Fase 3 — Evaluación**: cada ciclo suma sus N aristas; si mejora al óptimo actual se registra como mejora. La ruta de cualquier fila del Trace se reconstruye a partir de su índice.
 
 ## Datos y Cálculos Clave
 
-- **Nodos**: contienen id, nombre, coordenadas, tipo de zona y volumen de residuos.
-- **Aristas**: guardan la distancia (km) entre nodos; se normaliza a dos decimales.
-- **Matriz de adyacencia**: permite consultas O(1) para validar conexiones y sumar distancias.
-- **Ciclos Hamiltonianos**: se generan con backtracking. El algoritmo tiene complejidad O(N!), adecuado para N ≤ 16.
-- **Métricas TSP**: para cada ciclo se calculan distancia total, tiempo (asumiendo 25 km/h) y CO₂ (0.2 kg/km). Se comparan la mejor y la peor rutas para mostrar ahorros.
+- **Rango de N**: 4–11. Con N = 11 hay 3 628 800 ciclos (~14 MB de costos); antes de ejecutar con N ≥ 10 se pide confirmación con el tiempo estimado.
+- **Tiempo**: `t = d / 25 × 60` (minutos, 25 km/h de velocidad media urbana).
+- **Emisiones**: `CO₂ = d × 0.2` (kg, factor de emisión por km).
+- **Ahorro**: diferencia entre la peor ruta y la óptima.
 
-## Interfaz de Usuario
+## Interfaz
 
-- **Wizard**: encabezado con 4 pasos (Configuración → Generación → Visualización → Ejecución) que refleja el estado actual.
-- **Controles principales**: formularios y tarjetas para configurar N, layout y velocidad de ejecución.
-- **Graph Editor**: modo edición con selección guiada, modales para pesos y toasts informativos.
-- **Logs**: panel tipo terminal que registra fases, matrices, ciclos y resultados.
+- **Barra superior**: N, layout, regenerar, modo edición.
+- **Lienzo**: grafo con la ruta en evaluación (azul) y la mejor encontrada (verde).
+- **Inspector / Trace**: paneles laterales descritos arriba.
+- **Teclado**: Espacio ejecutar/pausar · ←/→ paso · Inicio/Fin · 1/2 pestañas · E edición · V/N/A/Supr herramientas · Tab recorre nodos · Esc cierra el popover.
+- Por debajo de 1024 px se muestra un aviso con enlace a `landing.html`.
 
 ## Estilos
 
-- Sistema de diseño basado en CSS modular (`variables.css`, `layout.css`, `components.css`, `animations.css`).
-- Uso de gradientes suaves, efecto "glass" en la cabecera y patrón de fondo tenue.
-- Paleta principal verde (sostenibilidad) con acentos azules.
+- `src/styles/tokens.css`: paleta Catppuccin Latte, roles de color y estilos de texto (IBM Plex Sans / Mono).
+- `src/styles/app.css` y `src/styles/landing.css`: estilos de cada página.
+- `assets/icons.svg`: sprite de íconos exportado del diseño en Figma.
+
+## Pruebas
+
+```bash
+npm test   # node --test, sin dependencias
+```
 
 ## Dependencias
 
-- **Cytoscape.js** (CDN) para renderizado interactivo del grafo.
-- **Flaticon UIcons** para iconografía (regular-rounded y solid-rounded).
+- **Cytoscape.js** (CDN) para el renderizado interactivo del grafo.
+- **IBM Plex Sans / Mono** (Google Fonts).
 
-## Estructura de Carpetas (reducida)
+## Estructura de Carpetas
 
 ```text
 root
 ├─ index.html
 ├─ landing.html
-├─ DOCUMENTATION.md
-├─ README.md
-└─ src/
-   ├─ js/
-   │  ├─ app.js
-   │  ├─ Graph.js
-   │  ├─ GraphEditor.js
-   │  ├─ CytoscapeRenderer.js
-   │  ├─ RandomGenerator.js
-   │  ├─ HamiltonianFinder.js
-   │  ├─ TSPSolver.js
-   │  └─ LogDisplay.js
-   └─ styles/
-      ├─ main.css
-      ├─ layout.css
-      ├─ components.css
-      ├─ animations.css
-      └─ variables.css
+├─ package.json
+├─ assets/
+│  └─ icons.svg
+├─ src/
+│  ├─ js/        (módulos listados arriba)
+│  └─ styles/
+│     ├─ tokens.css
+│     ├─ app.css
+│     └─ landing.css
+└─ test/
+   └─ search-engine.test.js
 ```
-
-## Próximos Pasos Sugeridos
-
-- Añadir pruebas unitarias para los módulos algorítmicos (`Graph`, `TSPSolver`).
-- Explorar heurísticas rápidas (Nearest Neighbor, 2-opt) para escenarios con más nodos.
-- Exportar resultados (CSV/JSON) desde el panel de logs.
