@@ -1,784 +1,255 @@
-// ============================================================================
-// APLICACIÓN GREENCIRCUIT - Lógica Principal
-// ============================================================================
-
-console.log("🌱 Iniciando GreenCircuit...");
-
-// ============================================================================
-// ESTADO GLOBAL
-// ============================================================================
-const state = {
-  graph: null,
-  renderer: null,
-  logger: null,
-  editor: null,
-  n: 10,
-  isConfigured: false,
-  isGenerated: false,
-  currentMode: "slow",
-  isExecuting: false,
-  shouldShowResults: false,
-};
-
-const TOAST_ICONS = {
-  success: "fi fi-rr-check-circle",
-  info: "fi fi-rr-info",
-  warning: "fi fi-rr-bell",
-  error: "fi fi-rr-exclamation",
-};
-
-const TOAST_DURATION = 3400;
-
-function showToast(message, type = "info") {
-  const container = document.getElementById("toast-stack");
-  if (!container) return;
-
-  const toast = document.createElement("div");
-  toast.className = `toast toast--${type}`;
-  toast.setAttribute("role", "status");
-
-  const iconWrapper = document.createElement("span");
-  iconWrapper.className = "toast-icon";
-  iconWrapper.setAttribute("aria-hidden", "true");
-
-  const iconElement = document.createElement("i");
-  iconElement.className = TOAST_ICONS[type] || TOAST_ICONS.info;
-  iconWrapper.appendChild(iconElement);
-
-  const messageSpan = document.createElement("span");
-  messageSpan.className = "toast-message";
-  messageSpan.textContent = message;
-
-  toast.append(iconWrapper, messageSpan);
-  container.appendChild(toast);
-
-  requestAnimationFrame(() => {
-    toast.classList.add("toast--visible");
-  });
-
-  const dismissToast = () => {
-    toast.classList.add("toast--hide");
-    toast.addEventListener(
-      "transitionend",
-      () => {
-        toast.remove();
-      },
-      { once: true }
-    );
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => Number(n).toFixed(2);
+  const number = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  const letter = (id) => String.fromCharCode(65 + id);
+  const state = {
+    n: 8,
+    layout: "random",
+    speed: 10,
+    playing: false,
+    edit: false,
+    tool: "select",
+    tab: "inspector",
+    graph: null,
+    engine: null,
+    cursor: -1,
+    cy: null,
+    selectedNode: null,
+    edge: null,
+    filter: "all",
+    traceOffset: 0,
+    traceSelected: null,
+    showWorst: false,
+    frame: null,
   };
-
-  const timeoutId = setTimeout(dismissToast, TOAST_DURATION);
-
-  toast.addEventListener("click", () => {
-    clearTimeout(timeoutId);
-    dismissToast();
-  });
-}
-
-window.showToast = showToast;
-
-// ============================================================================
-// INICIALIZACIÓN
-// ============================================================================
-function init() {
-  console.log("Inicializando componentes...");
-
-  state.renderer = new CytoscapeRenderer(
-    document.getElementById("graph-container")
-  );
-  state.renderer.initialize();
-
-  state.logger = new LogDisplay(document.getElementById("log-container"));
-  state.logger.log("🌱 GreenCircuit iniciado", "success");
-  state.logger.log(
-    "Sistema listo. Configura el número de nodos para comenzar.",
-    "info"
-  );
-
-  setupEventListeners();
-
-  console.log("✅ GreenCircuit listo");
-}
-
-// ============================================================================
-// EVENT LISTENERS
-// ============================================================================
-function setupEventListeners() {
-  document
-    .getElementById("btn-config")
-    .addEventListener("click", handleConfigSubmit);
-  document
-    .getElementById("btn-random")
-    .addEventListener("click", () => handleGenerateRandom("random"));
-  document
-    .getElementById("btn-random-circular")
-    .addEventListener("click", () => handleGenerateRandom("circular"));
-  document
-    .getElementById("btn-random-grid")
-    .addEventListener("click", () => handleGenerateRandom("grid"));
-  document
-    .getElementById("btn-fit-view")
-    .addEventListener("click", () => state.renderer.fitView());
-  document
-    .getElementById("btn-reset-view")
-    .addEventListener("click", () => state.renderer.resetView());
-  document
-    .getElementById("btn-toggle-edit")
-    .addEventListener("click", toggleEditMode);
-  document
-    .getElementById("btn-clear-graph")
-    .addEventListener("click", clearGraph);
-  document
-    .getElementById("btn-continue-execution")
-    .addEventListener("click", goToExecutionStep);
-  document
-    .getElementById("btn-fast")
-    .addEventListener("click", () => handleSetExecutionMode("fast"));
-  document
-    .getElementById("btn-slow")
-    .addEventListener("click", () => handleSetExecutionMode("slow"));
-  document
-    .getElementById("btn-manual-step")
-    .addEventListener("click", () => handleSetExecutionMode("manual"));
-  document
-    .getElementById("btn-execute")
-    .addEventListener("click", executeAlgorithm);
-  document
-    .getElementById("btn-clear-logs")
-    .addEventListener("click", () => state.logger.clear());
-
-  // Event listeners para los inputs de radio (como respaldo)
-  document
-    .getElementById("speed-fast")
-    .addEventListener("change", () => handleSetExecutionMode("fast"));
-  document
-    .getElementById("speed-slow")
-    .addEventListener("change", () => handleSetExecutionMode("slow"));
-  document
-    .getElementById("speed-manual")
-    .addEventListener("change", () => handleSetExecutionMode("manual"));
-}
-
-// ============================================================================
-// EJECUCIÓN DEL ALGORITMO
-// ============================================================================
-async function executeAlgorithm() {
-  if (!state.isGenerated) {
-    state.logger.log("❌ Error: Primero debes generar el grafo", "error");
-    return;
-  }
-
-  if (state.isExecuting) {
-    state.logger.log("⚠️ Ya hay una ejecución en curso", "warning");
-    return;
-  }
-
-  try {
-    state.isExecuting = true;
-    document.getElementById("btn-execute").disabled = true;
-    document.getElementById("progress-container").classList.remove("hidden");
-
-    state.shouldShowResults = true;
-    syncAuxSections();
-
-    state.logger.clear();
-    state.logger.log("═══════════════════════════════════════", "separator");
-    state.logger.log("▶️ INICIANDO ALGORITMO", "header");
-    state.logger.log("═══════════════════════════════════════", "separator");
-
-    updateProgress(10, "Construyendo matriz de adyacencia...");
-    await delay(100);
-
-    // FASE 1: Matriz
-    state.logger.log("\n--- FASE 1: MATRIZ DE ADYACENCIA ---", "phase");
-    state.graph.buildAdjacencyMatrix();
-    state.logger.log("✅ Matriz construida", "success");
-    state.logger.displayMatrix(state.graph.getMatrix());
-    await delay(state.currentMode === "fast" ? 500 : 1000);
-
-    updateProgress(25, "Buscando ciclos hamiltonianos...");
-
-    // FASE 2: Ciclos Hamiltonianos
-    state.logger.log("\n--- FASE 2: CICLOS HAMILTONIANOS ---", "phase");
-
-    const finder = new HamiltonianFinder(state.graph);
-
-    // Ejecutar búsqueda de ciclos con actualizaciones de progreso
-    const cycles = await findCyclesWithProgress(finder);
-
-    if (cycles.length === 0) {
-      state.logger.log("❌ No se encontraron ciclos hamiltonianos", "error");
-      return;
-    }
-
-    state.logger.log(`✅ Se encontraron ${cycles.length} ciclos`, "success");
-
-    // Mostrar algunos ciclos (no todos si son muchos)
-    const cyclesToShow = Math.min(cycles.length, 10);
-    state.logger.log(`\nMostrando primeros ${cyclesToShow} ciclos:`, "info");
-    for (let i = 0; i < cyclesToShow; i++) {
-      state.logger.log(`  Ciclo #${i + 1}: ${cycles[i].join(" → ")}`, "cycle");
-    }
-    if (cycles.length > cyclesToShow) {
-      state.logger.log(
-        `  ... y ${cycles.length - cyclesToShow} ciclos más`,
-        "info"
-      );
-    }
-
-    await delay(state.currentMode === "fast" ? 500 : 1000);
-
-    updateProgress(60, "Resolviendo TSP...");
-
-    // FASE 3: TSP
-    state.logger.log("\n--- FASE 3: PROBLEMA DEL AGENTE VIAJERO ---", "phase");
-    state.logger.log(`Evaluando ${cycles.length} ciclos...`, "info");
-
-    const solver = new TSPSolver(state.graph, cycles);
-
-    // Resolver TSP con actualizaciones de progreso
-    const solution = await solveTSPWithProgress(solver);
-
-    updateProgress(90, "Generando resultados...");
-
-    state.logger.log("✅ TSP resuelto", "success");
-    await delay(500);
-
-    // FASE 4: Resultados
-    state.logger.log("\n--- FASE 4: RESULTADOS ---", "phase");
-
-    const fullSolution = solver.exportResults();
-    state.logger.displayResults({
-      optimal: fullSolution.optimal,
-      worst: fullSolution.worst,
-      savings: solution.savings,
-      summary: solution.summary,
-    });
-
-    state.renderer.highlightPath(fullSolution.optimal.cycle);
-    state.logger.log("\n✅ Ruta óptima destacada en el grafo", "success");
-
-    updateProgress(100, "Completado");
-    showStatus("execution-status", "✅ Algoritmo completado", "success");
-  } catch (error) {
-    state.logger.log(`❌ Error: ${error.message}`, "error");
-    console.error("Error:", error);
-  } finally {
-    state.isExecuting = false;
-    document.getElementById("btn-execute").disabled = false;
-    setTimeout(() => {
-      document.getElementById("progress-container").classList.add("hidden");
-    }, 2000);
-    syncAuxSections();
-  }
-}
-
-// ============================================================================
-// FUNCIONES AUXILIARES
-// ============================================================================
-
-// Función auxiliar para buscar ciclos con pausas (evita congelamiento)
-async function findCyclesWithProgress(finder) {
-  const startTime = Date.now();
-  const cycles = finder.findAllCycles(0);
-  const duration = Date.now() - startTime;
-
-  if (duration > 100) {
-    await delay(100); // Pausa para que el navegador respire
-  }
-
-  updateProgress(50, `Encontrados ${cycles.length} ciclos`);
-  return cycles;
-}
-
-// Función auxiliar para resolver TSP con pausas
-async function solveTSPWithProgress(solver) {
-  const solution = solver.solve();
-  await delay(100); // Pausa para actualización de UI
-  return solution;
-}
-
-function updateProgress(percent, message) {
-  const progressFill = document.getElementById("progress-fill");
-  const progressText = document.getElementById("progress-text");
-
-  if (progressFill && progressText) {
-    progressFill.style.width = `${percent}%`;
-    progressText.textContent = `Progreso: ${percent}% - ${message}`;
-  }
-}
-
-function showGraphInfo(info, stats) {
-  const infoDiv = document.getElementById("graph-info");
-  const statsDiv = document.getElementById("graph-stats");
-
-  statsDiv.innerHTML = `
-    <p>📊 Nodos: ${info.nodeCount} | Aristas: ${info.edgeCount} | Completo: ${
-    info.isComplete ? "Sí" : "No"
-  }</p>
-    <p>📦 Total residuos: ${
-      info.totalWaste
-    } kg | Promedio: ${stats.avgWaste.toFixed(1)} kg/punto</p>
-    <p>🏘️ Residencial: ${stats.wasteByType.residencial?.count || 0} puntos | 
-       🏢 Comercial: ${stats.wasteByType.comercial?.count || 0} puntos | 
-       🏭 Industrial: ${stats.wasteByType.industrial?.count || 0} puntos</p>
-  `;
-
-  infoDiv.classList.remove("hidden");
-}
-
-function showStatus(elementId, message, type = "info") {
-  const element = document.getElementById(elementId);
-  if (element) {
-    element.textContent = message;
-    element.style.color =
-      type === "error" ? "#F44336" : type === "success" ? "#4CAF50" : "#2196F3";
-  }
-}
-
-function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-// ============================================================================
-// MODO EDICIÓN
-// ============================================================================
-
-function toggleEditMode() {
-  if (!state.editor) {
-    state.logger.log("Error: Editor no inicializado", "error");
-    return;
-  }
-
-  if (!state.isGenerated) {
-    alert("⚠️ Primero debes generar un grafo");
-    state.logger.log(
-      "Advertencia: Genera un grafo antes de activar el modo edición",
-      "warning"
-    );
-    return;
-  }
-
-  const btn = document.getElementById("btn-toggle-edit");
-  const infoBox = document.getElementById("edit-mode-info");
-  const clearBtn = document.getElementById("btn-clear-graph");
-
-  if (state.editor.editModeActive) {
-    // Desactivar modo edición
-    state.editor.disableEditMode();
-    btn.classList.remove("active");
-    btn.textContent = "✏️ Modo Edición";
-    infoBox.classList.add("hidden");
-    clearBtn.classList.add("hidden");
-  } else {
-    // Activar modo edición
-    state.editor.enableEditMode();
-    btn.classList.add("active");
-    btn.textContent = "🔒 Desactivar Edición";
-    infoBox.classList.remove("hidden");
-    clearBtn.classList.remove("hidden");
-  }
-}
-
-function updateGraphInfo() {
-  if (!state.graph) return;
-
-  const info = state.graph.getInfo();
-  const stats = RandomGenerator.getStatistics(state.graph.nodes);
-
-  showGraphInfo(info, stats);
-}
-
-function clearGraph() {
-  if (!state.graph || state.graph.nodes.length === 0) {
-    alert("⚠️ No hay nodos para eliminar");
-    return;
-  }
-
-  const confirmed = confirm(
-    `¿Eliminar todos los ${state.graph.nodes.length} nodos del grafo?\n\nEsta acción no se puede deshacer.`
-  );
-
-  if (!confirmed) return;
-
-  // Limpiar el grafo
-  state.graph.nodes = [];
-  state.graph.edges = [];
-  state.graph.adjacencyMatrix = [];
-
-  // Re-renderizar (canvas vacío)
-  state.renderer.renderGraph(state.graph);
-
-  // Log
-  state.logger.log("🗑️ Grafo limpiado - Todos los nodos eliminados", "warning");
-  state.logger.log(
-    "   Puedes agregar nodos manualmente o generar un nuevo grafo",
-    "info"
-  );
-
-  // Ocultar info del grafo
-  document.getElementById("graph-info").classList.add("hidden");
-
-  // Cambiar estado
-  state.isGenerated = false;
-  state.shouldShowResults = false;
-  syncAuxSections();
-
-  // Opcional: desactivar modo edición
-  if (state.editor && state.editor.editModeActive) {
-    toggleEditMode();
-  }
-}
-
-// Hacer disponible globalmente para GraphEditor
-window.showGraphInfo = showGraphInfo;
-
-// ============================================================================
-// WIZARD - PROGRESIÓN PASO A PASO
-// ============================================================================
-
-const wizardState = {
-  currentStep: 1,
-  completedSteps: [],
-};
-
-const wizardStepPrompts = {
-  1: "Configura el número de puntos para iniciar.",
-  2: "Genera el grafo con la configuración establecida.",
-  3: "Explora y ajusta el grafo antes de continuar.",
-  4: "Configura la velocidad y ejecuta el algoritmo.",
-};
-
-const wizardStepRequirements = {
-  2: "Completa la configuración para desbloquear la generación.",
-  3: "Genera un grafo para habilitar la visualización.",
-  4: "Revisa el grafo para ejecutar el TSP.",
-};
-
-const wizardStepIcons = {
-  completed: "fi fi-rr-check",
-  locked: "fi fi-rr-lock",
-};
-
-function renderWizardIcon(target, iconClass) {
-  if (!target) return;
-  target.innerHTML = "";
-  const wrapper = document.createElement("span");
-  wrapper.className = "wizard-icon";
-  wrapper.setAttribute("aria-hidden", "true");
-
-  const iconElement = document.createElement("i");
-  iconElement.className = iconClass;
-  wrapper.appendChild(iconElement);
-
-  target.appendChild(wrapper);
-}
-
-function initWizard() {
-  // Asegurar que solo el paso 1 esté visible al inicio
-  showWizardStep(1);
-  updateWizardProgress(1);
-}
-
-function showWizardStep(stepNumber) {
-  // Ocultar secciones específicas del wizard
-  const sections = [
-    document.getElementById("config-section"),
-    document.getElementById("generation-section"),
-    document.getElementById("visualization-section"),
-    document.getElementById("controls-section"),
-  ];
-
-  sections.forEach((section) => {
-    if (section) section.classList.add("hidden");
-  });
-
-  // Mostrar la sección correspondiente al paso
-  const sectionMap = {
-    1: "config-section",
-    2: "generation-section",
-    3: "visualization-section",
-    4: "controls-section",
+  const routeText = (route) => (route ? route.map(letter).join(" → ") : "—");
+  const routeEdges = (route) => {
+    const edges = new Set();
+    if (route)
+      for (let i = 1; i < route.length; i++)
+        edges.add([route[i - 1], route[i]].sort((a, b) => a - b).join("-"));
+    return edges;
   };
-
-  const sectionToShow = document.getElementById(sectionMap[stepNumber]);
-  if (sectionToShow) {
-    sectionToShow.classList.remove("hidden");
-    // Animación de entrada
-    sectionToShow.style.animation = "fadeInUp 0.5s ease-out";
-  }
-
-  const continueButton = document.getElementById("btn-continue-execution");
-  if (continueButton) {
-    if (stepNumber === 3 && state.isGenerated) {
-      continueButton.classList.remove("hidden");
-    } else {
-      continueButton.classList.add("hidden");
-    }
-  }
-
-  wizardState.currentStep = stepNumber;
-  syncAuxSections();
-}
-
-function syncAuxSections() {
-  const visualizationSection = document.getElementById("visualization-section");
-  if (visualizationSection) {
-    if (state.isGenerated) {
-      visualizationSection.classList.remove("hidden");
-    } else {
-      visualizationSection.classList.add("hidden");
-    }
-  }
-
-  const resultsSection = document.getElementById("results-section");
-  if (resultsSection) {
-    if (state.shouldShowResults || state.isExecuting) {
-      resultsSection.classList.remove("hidden");
-    } else {
-      resultsSection.classList.add("hidden");
-    }
-  }
-}
-
-function updateWizardProgress(currentStep) {
-  wizardState.currentStep = currentStep;
-
-  for (let i = 1; i <= 4; i++) {
-    const stepNumber = document.querySelector(
-      `.wizard-step[data-step="${i}"] .wizard-step-number`
-    );
-    const stepContainer = document.querySelector(
-      `.wizard-step[data-step="${i}"]`
-    );
-
-    if (!stepNumber || !stepContainer) continue;
-
-    const labelElement = stepContainer.querySelector(".wizard-step-label");
-    const labelText = labelElement
-      ? labelElement.textContent.trim()
-      : `Paso ${i}`;
-
-    stepContainer.classList.remove("active", "completed", "locked");
-
-    if (i < currentStep) {
-      renderWizardIcon(stepNumber, wizardStepIcons.completed);
-      stepNumber.setAttribute("aria-label", `${labelText} completado`);
-      stepContainer.classList.add("completed");
-      stepContainer.setAttribute("title", `${labelText} completado`);
-
-      if (!wizardState.completedSteps.includes(i)) {
-        wizardState.completedSteps.push(i);
-      }
-    } else if (i === currentStep) {
-      stepNumber.textContent = i;
-      stepNumber.setAttribute("aria-label", `${labelText} en curso`);
-      stepContainer.classList.add("active");
-      stepContainer.setAttribute(
-        "title",
-        wizardStepPrompts[i] || `${labelText} en progreso`
-      );
-    } else {
-      renderWizardIcon(stepNumber, wizardStepIcons.locked);
-      stepNumber.setAttribute("aria-label", `${labelText} bloqueado`);
-      stepContainer.classList.add("locked");
-      stepContainer.setAttribute(
-        "title",
-        wizardStepRequirements[i] || "Completa el paso previo para avanzar"
-      );
-    }
-  }
-
-  const stepLines = document.querySelectorAll(".wizard-step-line");
-  stepLines.forEach((line, index) => {
-    line.classList.remove("active", "completed");
-    if (index < currentStep - 1) {
-      line.classList.add("completed");
-    } else if (index === currentStep - 1) {
-      line.classList.add("active");
-    }
+  const graphView = new GraphView($("graph"), {
+    state,
+    letter,
+    accessRoot: $("graph-access"),
+    routeEdges,
+    resetEngine,
+    render,
+    openEdge,
   });
-}
-
-function advanceWizard() {
-  // Avanza hasta el paso 4 (Config → Generación → Visualización → Ejecución)
-  if (wizardState.currentStep < 4) {
-    const nextStep = wizardState.currentStep + 1;
-    showWizardStep(nextStep);
-    updateWizardProgress(nextStep);
-    state.logger.log(`📋 Avanzando al paso ${nextStep}`, "info");
+  const drawGraph = () => graphView.draw();
+  const colorGraph = () => graphView.highlight();
+  function resetEngine() {
+    state.playing = false;
+    state.toEnd = false;
+    if (state.frame) cancelAnimationFrame(state.frame);
+    state.engine = new SearchEngine(state.graph);
+    state.cursor = -1;
+    state.traceSelected = null;
+    state.showWorst = false;
   }
-}
-
-function goToExecutionStep() {
-  if (!state.isGenerated) {
-    state.logger.log(
-      "⚠️ Debes generar un grafo antes de continuar a la ejecución",
-      "warning"
-    );
-    return;
-  }
-
-  showWizardStep(4);
-  updateWizardProgress(4);
-  state.logger.log("▶️ Preparando ejecución del algoritmo", "info");
-}
-
-// ============================================================================
-// HANDLERS CON INTEGRACIÓN DE WIZARD
-// ============================================================================
-
-function handleConfigSubmit() {
-  const n = parseInt(document.getElementById("input-n").value);
-
-  if (isNaN(n) || n < 4 || n > 16) {
-    showStatus("config-status", "❌ Error: N debe estar entre 4 y 16", "error");
-    state.logger.log("Error: N debe estar entre 4 y 16", "error");
-    return;
-  }
-
-  try {
-    state.n = n;
-    state.graph = new Graph(n);
-    state.isConfigured = true;
-
-    // Inicializar editor si no existe
-    if (!state.editor) {
-      state.editor = new GraphEditor(state.graph, state.renderer, state.logger);
-    } else {
-      // Actualizar referencia al grafo
-      state.editor.graph = state.graph;
-    }
-
-    showStatus("config-status", `✅ Configurado: ${n} nodos`, "success");
-    state.logger.log(`✅ Grafo configurado con ${n} nodos`, "success");
-
-    // Avanzar al paso 2 después de configurar
-    setTimeout(() => advanceWizard(), 500);
-  } catch (error) {
-    console.error("Error:", error);
-    showStatus("config-status", `❌ Error: ${error.message}`, "error");
-  }
-}
-
-function handleGenerateRandom(layout = "random") {
-  if (!state.isConfigured) {
-    state.logger.log(
-      "Error: Primero debes configurar el número de nodos",
-      "error"
-    );
-    return;
-  }
-
-  state.logger.clear();
-  state.logger.log(
-    `🎲 Generando ${state.n} nodos en layout ${layout}...`,
-    "info"
-  );
-
-  try {
+  function generate() {
     let nodes;
-
-    switch (layout) {
-      case "circular":
-        nodes = RandomGenerator.generateCircularLayout(state.n, {
-          centerX: 400,
-          centerY: 250,
-        });
-        break;
-      case "grid":
-        nodes = RandomGenerator.generateGridLayout(state.n, {
-          width: 800,
-          height: 500,
-        });
-        break;
-      default:
-        nodes = RandomGenerator.generate(state.n, {
-          width: 800,
-          height: 500,
-        });
+    if (state.layout === "circular") nodes = RandomGenerator.generateCircularLayout(state.n);
+    else if (state.layout === "grid") nodes = RandomGenerator.generateGridLayout(state.n);
+    else {
+      const seed = new URLSearchParams(location.search).get("seed");
+      nodes = RandomGenerator.generate(state.n, seed === null ? {} : { seed: Number(seed) });
     }
-
-    nodes.forEach((node) => state.graph.addNode(node));
-
-    const edges = RandomGenerator.generateCompleteGraph(state.graph.nodes);
-    edges.forEach((edge) =>
-      state.graph.addEdge(edge.from, edge.to, edge.distance)
+    const graph = new Graph(state.n);
+    nodes.forEach((n) => graph.addNode(n));
+    RandomGenerator.generateCompleteGraph(nodes).forEach((e) =>
+      graph.addEdge(e.from, e.to, e.distance),
     );
-
-    state.renderer.renderGraph(state.graph);
-
-    const info = state.graph.getInfo();
-    const stats = RandomGenerator.getStatistics(state.graph.nodes);
-
-    state.logger.log(`✅ Grafo generado exitosamente`, "success");
-    state.logger.log(`   Nodos: ${info.nodeCount}`, "info");
-    state.logger.log(`   Aristas: ${info.edgeCount}`, "info");
-    state.logger.log(`   Total de residuos: ${info.totalWaste} kg`, "info");
-
-    showStatus(
-      "generation-status",
-      "✅ Grafo generado correctamente",
-      "success"
-    );
-    showGraphInfo(info, stats);
-
-    state.isGenerated = true;
-
-    // Actualizar referencia del editor al grafo
-    if (state.editor) {
-      state.editor.graph = state.graph;
-    }
-
-    // Avanzar al paso 3 después de generar
-    setTimeout(() => advanceWizard(), 800);
-  } catch (error) {
-    state.logger.log(`❌ Error: ${error.message}`, "error");
-    showStatus("generation-status", `❌ Error: ${error.message}`, "error");
+    state.graph = graph;
+    resetEngine();
+    drawGraph();
+    render();
   }
-}
-
-function handleSetExecutionMode(mode) {
-  state.currentMode = mode;
-  state.logger.log(`⚙️ Modo de ejecución: ${mode}`, "info");
-  showStatus("execution-status", `Modo: ${mode}`, "info");
-
-  if (mode === "manual") {
-    document.getElementById("manual-controls").classList.remove("hidden");
-  } else {
-    document.getElementById("manual-controls").classList.add("hidden");
-  }
-
-  // Actualizar visualización de las tarjetas de velocidad
-  document.querySelectorAll(".speed-card").forEach((card) => {
-    card.classList.remove("active");
-  });
-  const selectedCard = document.querySelector(
-    `.speed-card[data-speed="${mode}"]`
+  const editor = new EditMode(
+    {
+      title: $("edge-title"),
+      weight: $("edge-weight"),
+      position: $("edge-position"),
+      dialog: $("edge-dialog"),
+      tools: $("tools"),
+    },
+    { state, letter, resetEngine, drawGraph, render },
   );
-  if (selectedCard) {
-    selectedCard.classList.add("active");
+  function openEdge() {
+    editor.openEdge();
   }
-
-  // Mantener sincronizado el estado visual del wizard con el paso 4
-  if (wizardState.currentStep < 4) {
-    goToExecutionStep();
-  } else {
-    updateWizardProgress(4);
-  }
-}
-
-// ============================================================================
-// INICIO AUTOMÁTICO
-// ============================================================================
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
-    init();
-    initWizard();
+  const resultPanel = new ResultPanel({ fmt, number, routeText });
+  const inspector = new Inspector(
+    $("inspector"),
+    {
+      state,
+      number,
+      fmt,
+      letter,
+      routeText,
+      routeEdges,
+    },
+    resultPanel,
+  );
+  const renderInspector = () => inspector.render();
+  const tracePanel = new TracePanel($("trace"), {
+    state,
+    number,
+    fmt,
+    letter,
   });
-} else {
-  init();
-  initWizard();
-}
-
-console.log("✅ Script cargado completamente");
+  const renderTrace = () => tracePanel.render();
+  const shellIds = [
+    "node-count",
+    "complexity",
+    "restart",
+    "instance",
+    "progress-text",
+    "improvement-count",
+    "progress-fill",
+    "playhead",
+    "ticks",
+    "track",
+    "play",
+    "minus",
+    "plus",
+    "regenerate",
+    "edit",
+    "layouts",
+    "speeds",
+    "tools",
+    "trace-count",
+    "inspector",
+    "trace",
+    "inspector-tab",
+    "trace-tab",
+    "legend",
+    "canvas-help",
+  ];
+  const roots = Object.fromEntries(shellIds.map((id) => [id, $(id)]));
+  const appView = new AppView(roots, {
+    state,
+    number,
+    fmt,
+    renderInspector,
+    renderTrace,
+    colorGraph,
+  });
+  function render() {
+    appView.render();
+  }
+  const playback = new Playback(
+    {
+      announcement: $("announcement"),
+      confirmStats: $("confirm-stats"),
+      dialog: $("confirm"),
+    },
+    { state, render, resetEngine, number, fmt },
+  );
+  const toggle = () => playback.toggle();
+  const begin = () => playback.begin();
+  const tick = () => playback.tick();
+  const navigate = (index) => playback.navigate(index);
+  $("play").onclick = toggle;
+  $("confirm-run").onclick = () => {
+    $("confirm").close();
+    begin();
+  };
+  $("cancel").onclick = () => $("confirm").close();
+  $("edge-cancel").onclick = () => editor.restoreEdge();
+  $("edge-apply").onclick = () => editor.applyEdge();
+  $("first").onclick = () => navigate(0);
+  $("prev").onclick = () => navigate(state.cursor - 1);
+  $("next").onclick = () => navigate(state.cursor + 1);
+  $("last").onclick = () => {
+    if (state.playing) return;
+    state.playing = true;
+    state.toEnd = true;
+    tick();
+  };
+  $("track").onclick = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    navigate(Math.floor(((event.clientX - rect.left) / rect.width) * (state.engine.capacity - 1)));
+  };
+  $("plus").onclick = () => {
+    if (state.n < 11) {
+      state.n++;
+      generate();
+    }
+  };
+  $("minus").onclick = () => {
+    if (state.n > 4) {
+      state.n--;
+      generate();
+    }
+  };
+  $("regenerate").onclick = generate;
+  $("restart").onclick = () => {
+    resetEngine();
+    render();
+  };
+  $("layouts").onclick = (e) => {
+    const b = e.target.closest("[data-layout]");
+    if (!b) return;
+    state.layout = b.dataset.layout;
+    $("layouts")
+      .querySelectorAll("button")
+      .forEach((x) => x.classList.toggle("selected", x === b));
+    generate();
+  };
+  $("speeds").onclick = (e) => {
+    const b = e.target.closest("[data-speed]");
+    if (!b) return;
+    state.speed = b.dataset.speed;
+    $("speeds")
+      .querySelectorAll("button")
+      .forEach((x) => x.classList.toggle("selected", x === b));
+  };
+  $("edit").onclick = () => {
+    state.edit = !state.edit;
+    state.playing = false;
+    render();
+  };
+  $("tools").onclick = (event) => editor.selectTool(event.target.closest("[data-tool]"));
+  $("inspector-tab").onclick = () => {
+    state.tab = "inspector";
+    render();
+  };
+  $("trace-tab").onclick = () => {
+    state.tab = "trace";
+    render();
+  };
+  $("zoom-in").onclick = () => state.cy?.zoom(state.cy.zoom() * 1.2);
+  $("zoom-out").onclick = () => state.cy?.zoom(state.cy.zoom() / 1.2);
+  $("fit").onclick = () => state.cy?.fit(undefined, 45);
+  document.addEventListener("keydown", (e) => {
+    if (e.target.matches("input,textarea,select") || document.querySelector("dialog[open]")) return;
+    const actions = {
+      " ": toggle,
+      ArrowLeft: () => navigate(state.cursor - 1),
+      ArrowRight: () => navigate(state.cursor + 1),
+      Home: () => navigate(0),
+      End: () => $("last").click(),
+      1: () => $("inspector-tab").click(),
+      2: () => $("trace-tab").click(),
+      e: () => $("edit").click(),
+      v: () => document.querySelector("[data-tool=select]").click(),
+      n: () => document.querySelector("[data-tool=node]").click(),
+      a: () => document.querySelector("[data-tool=edge]").click(),
+      Delete: () => document.querySelector("[data-tool=delete]").click(),
+    };
+    if (actions[e.key]) {
+      e.preventDefault();
+      actions[e.key]();
+    }
+  });
+  window.addEventListener("resize", () => {
+    if (window.innerWidth < 1024)
+      document.querySelectorAll("dialog[open]").forEach((dialog) => dialog.close());
+  });
+  generate();
+})();

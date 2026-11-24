@@ -1,498 +1,496 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GreenCircuit - Optimización de Rutas de Recolección</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tourbench — Búsqueda exhaustiva del TSP</title>
     <meta
       name="description"
-      content="Optimización de rutas de recolección de residuos urbanos usando el Problema del Agente Viajero (TSP)"
+      content="Tourbench enumera todos los ciclos hamiltonianos de un grafo completo y muestra, paso a paso, cómo la fuerza bruta encuentra la ruta más corta del TSP."
     />
-
-    <link rel="icon" type="image/png" href="assets/leaf-icon.png" />
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="src/styles/main.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css"
+    <link rel="canonical" href="https://tourbench.jahattrinidad.com/" />
+    <meta name="theme-color" content="#eff1f5" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Tourbench" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:title" content="Tourbench — Búsqueda exhaustiva del TSP" />
+    <meta
+      property="og:description"
+      content="Tourbench enumera todos los ciclos hamiltonianos de un grafo completo y muestra, paso a paso, cómo la fuerza bruta encuentra la ruta más corta del TSP."
     />
-    <link
-      rel="stylesheet"
-      href="https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css"
+    <meta property="og:url" content="https://tourbench.jahattrinidad.com/" />
+    <meta property="og:image" content="https://tourbench.jahattrinidad.com/assets/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Tourbench: búsqueda exhaustiva del TSP, paso a paso, con un grafo de 8 nodos y su ruta óptima"
     />
-
-    <!-- Cytoscape.js desde CDN -->
-    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="src/styles/tokens.css" />
+    <link rel="stylesheet" href="src/styles/landing.css" />
+    <link rel="stylesheet" href="src/styles/about.css" />
   </head>
-
   <body>
-    <!-- CONTENEDOR PRINCIPAL DE LA APP -->
-    <div class="app-container">
-      <!-- HEADER CON WIZARD INTEGRADO -->
-      <header class="app-header">
-        <div class="app-logo">
-          <span class="app-logo-icon">
-            <img
-              src="assets/leaf-icon.png"
-              alt="GreenCircuit"
-              width="44"
-              height="44"
-            />
-          </span>
-          <span class="app-logo-text">GreenCircuit</span>
+    <header class="site-header">
+      <nav class="wrap nav" aria-label="Navegación principal">
+        <a class="brand" href="./">
+          <svg class="icon" width="24" height="24" aria-hidden="true">
+            <use href="assets/icons.svg#brand-mark"></use>
+          </svg>
+          Tourbench
+        </a>
+        <div class="nav-links">
+          <a href="#problema">Problema</a>
+          <a href="#metodo">Método</a>
+          <a href="#complejidad">Complejidad</a>
+          <a href="#arquitectura">Arquitectura</a>
         </div>
-
-        <!-- WIZARD PROGRESS EN HEADER -->
-        <div class="wizard-progress-header">
-          <div class="wizard-steps">
-            <div class="wizard-step active" data-step="1">
-              <div class="wizard-step-number">1</div>
-              <div class="wizard-step-label">Configuración</div>
+        <div class="actions">
+          <a class="button ghost nav-github" href="https://github.com/trinity-bytes/green-circuit">
+            <svg class="icon" width="16" height="16" aria-hidden="true">
+              <use href="assets/icons.svg#icon-github"></use>
+            </svg>
+            GitHub
+          </a>
+          <a class="button primary" href="app.html">
+            <svg class="icon" width="16" height="16" aria-hidden="true">
+              <use href="assets/icons.svg#icon-arrow-up-right"></use>
+            </svg>
+            Abrir la app
+          </a>
+        </div>
+      </nav>
+    </header>
+    <main>
+      <section class="hero wrap">
+        <div class="hero-copy">
+          <p class="eyebrow">PROYECTO ACADÉMICO · TEORÍA DE GRAFOS</p>
+          <h1>La ruta de recolección más corta, encontrada por fuerza bruta.</h1>
+          <p>
+            Tourbench modela los puntos de recolección como un grafo completo, enumera los (N−1)!
+            ciclos hamiltonianos que parten del origen y conserva el de menor costo. Cada paso queda
+            a la vista: la ruta evaluada, su suma y la celda de la matriz que la produce.
+          </p>
+          <div class="actions">
+            <a class="button primary" href="app.html">
+              <svg class="icon" width="16" height="16" aria-hidden="true">
+                <use href="assets/icons.svg#icon-play"></use>
+              </svg>
+              Abrir la app
+            </a>
+            <a class="button outline" href="https://github.com/trinity-bytes/green-circuit">
+              <svg class="icon" width="16" height="16" aria-hidden="true">
+                <use href="assets/icons.svg#icon-github"></use>
+              </svg>
+              Ver código fuente
+            </a>
+          </div>
+          <div class="facts">
+            <div>
+              <span class="eyebrow">PUNTOS</span>
+              <strong>4–11</strong>
             </div>
-            <div class="wizard-step-line"></div>
-            <div class="wizard-step" data-step="2">
-              <div class="wizard-step-number">2</div>
-              <div class="wizard-step-label">Generación</div>
+            <div>
+              <span class="eyebrow">CICLOS CON N = 8</span>
+              <strong>5 040</strong>
             </div>
-            <div class="wizard-step-line"></div>
-            <div class="wizard-step" data-step="3">
-              <div class="wizard-step-number">3</div>
-              <div class="wizard-step-label">Visualización</div>
-            </div>
-            <div class="wizard-step-line"></div>
-            <div class="wizard-step" data-step="4">
-              <div class="wizard-step-number">4</div>
-              <div class="wizard-step-label">Ejecución</div>
+            <div>
+              <span class="eyebrow">DEPENDENCIAS</span>
+              <strong>Cytoscape.js</strong>
             </div>
           </div>
         </div>
-
-        <div class="flex items-center gap-4">
-          <a
-            href="https://github.com/trinity-bytes/GreenCircuit"
-            class="btn btn-ghost btn-sm"
-            target="_blank"
-            rel="noopener noreferrer"
+        <div class="graph-panel">
+          <div class="graph-header">
+            <span class="eyebrow">N = 8 · ALEATORIO</span>
+            <span class="graph-caption">
+              <span class="route-swatch" aria-hidden="true"></span>
+              18.16 km · ciclo #2 121 de 5 040
+            </span>
+          </div>
+          <svg
+            class="graph"
+            viewBox="0 0 520 410"
+            role="img"
+            aria-label="Grafo de ocho puntos con la ruta óptima destacada en verde"
           >
-            <svg
-              class="icon"
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
-            >
+            <g class="edges">
               <path
-                fill="currentColor"
-                d="M12 2a10 10 0 0 0-3.16 19.48c.5.09.68-.22.68-.48 0-.24-.01-.87-.01-1.71-2.78.6-3.37-1.34-3.37-1.34-.45-1.15-1.11-1.46-1.11-1.46-.9-.62.07-.61.07-.61 1 .07 1.54 1.03 1.54 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.28.1-2.66 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.41.1 2.66.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.86 0 1.34-.01 2.42-.01 2.75 0 .27.18.58.69.48A10 10 0 0 0 12 2"
+                d="M48 367 181 40 385 188 200 289 426 55 474 315 105 180 355 367Z M48 367 385 188 426 55 105 180 200 289 181 40 474 315 355 367 385 188 M48 367 200 289 474 315 M48 367 426 55 M48 367 105 180 M48 367 355 367 M181 40 426 55 M181 40 105 180 M181 40 355 367 M385 188 474 315 M385 188 105 180 M200 289 355 367 M200 289 105 180 M426 55 355 367 M426 55 474 315 M105 180 474 315 M105 180 355 367"
               />
-            </svg>
-            <span>Ver código fuente</span>
-          </a>
-          <a href="landing.html" class="btn btn-outline btn-sm">
-            <i class="fi fi-rr-info icon" aria-hidden="true"></i>
-            <span>Más información</span>
-          </a>
+            </g>
+            <path
+              class="best"
+              d="M48 367 105 180 181 40 426 55 385 188 474 315 355 367 200 289 48 367"
+            />
+            <g class="nodes">
+              <circle class="start-ring" cx="48" cy="367" r="20" />
+              <circle class="start" cx="48" cy="367" r="16" />
+              <circle cx="181" cy="40" r="16" />
+              <circle cx="385" cy="188" r="16" />
+              <circle cx="200" cy="289" r="16" />
+              <circle cx="426" cy="55" r="16" />
+              <circle cx="474" cy="315" r="16" />
+              <circle cx="105" cy="180" r="16" />
+              <circle cx="355" cy="367" r="16" />
+            </g>
+            <g class="node-labels">
+              <text class="start-label" x="48" y="367">A</text>
+              <text x="181" y="40">B</text>
+              <text x="385" y="188">C</text>
+              <text x="200" y="289">D</text>
+              <text x="426" y="55">E</text>
+              <text x="474" y="315">F</text>
+              <text x="105" y="180">G</text>
+              <text x="355" y="367">H</text>
+            </g>
+          </svg>
         </div>
-      </header>
-
-      <!-- MAIN CONTENT CENTRADO -->
-      <main class="app-main app-main--scroll">
-        <div class="container-narrow">
-          <!-- SECCIÓN 1: CONFIGURACIÓN -->
-          <section
-            id="config-section"
-            class="content-section animate-fade-in-up delay-200"
-          >
-            <div class="section-header">
-              <div>
-                <div class="section-heading">
-                  <div class="section-step-badge">1</div>
-                  <h2 class="section-title">Configuración del Grafo</h2>
-                </div>
-                <p class="section-subtitle section-subtitle-offset">
-                  Define el número de puntos de recolección para optimizar
-                </p>
-              </div>
-            </div>
-
-            <div class="card mt-6">
-              <div class="card-body">
-                <div class="form-group">
-                  <label for="input-n" class="form-label">
-                    <strong
-                      >¿Cuántos puntos de recolección deseas optimizar?</strong
-                    >
-                  </label>
-                  <div class="flex items-center gap-4">
-                    <input
-                      type="number"
-                      id="input-n"
-                      class="form-input form-input--counter"
-                      min="4"
-                      max="16"
-                      value="8"
-                      placeholder="Ej: 8"
-                    />
-                    <span class="text-secondary text-sm"
-                      >puntos (entre 4 y 16)</span
-                    >
-                  </div>
-                  <small class="form-helper flex items-start gap-2">
-                    <i class="fi fi-rr-bulb icon" aria-hidden="true"></i>
-                    <span>
-                      <strong>Recomendación:</strong> Comienza con 10 puntos
-                      para una ejecución rápida. Valores mayores a 12 pueden
-                      tardar varios segundos.
-                    </span>
-                  </small>
-                </div>
-
-                <button id="btn-config" class="btn btn-primary btn-lg w-full">
-                  <i class="fi fi-rr-check-circle icon" aria-hidden="true"></i>
-                  <span>Continuar</span>
-                </button>
-              </div>
-            </div>
-
-            <div id="config-status" class="mt-4"></div>
-          </section>
-
-          <!-- SECCIÓN 2: GENERACIÓN (Inicialmente oculta) -->
-          <section id="generation-section" class="content-section hidden">
-            <div class="section-header">
-              <div>
-                <div class="section-heading">
-                  <div class="section-step-badge">2</div>
-                  <h2 class="section-title">Generación del Grafo</h2>
-                </div>
-                <p class="section-subtitle section-subtitle-offset">
-                  Elige cómo distribuir los puntos en el mapa
-                </p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-3 gap-4 mt-6">
-              <button id="btn-random" class="card hover-lift">
-                <div class="card-emoji">
-                  <i class="fi fi-rr-dice" aria-hidden="true"></i>
-                </div>
-                <h3 class="card-heading">Aleatorio</h3>
-                <p class="card-description">
-                  Distribución aleatoria con separación mínima
-                </p>
-              </button>
-
-              <button id="btn-random-circular" class="card hover-lift">
-                <div class="card-emoji">
-                  <i class="fi fi-rr-circle" aria-hidden="true"></i>
-                </div>
-                <h3 class="card-heading">Circular</h3>
-                <p class="card-description">
-                  Puntos distribuidos en un círculo uniforme
-                </p>
-              </button>
-
-              <button id="btn-random-grid" class="card hover-lift">
-                <div class="card-emoji">
-                  <i class="fi fi-rr-grid" aria-hidden="true"></i>
-                </div>
-                <h3 class="card-heading">Grid</h3>
-                <p class="card-description">
-                  Distribución en cuadrícula regular
-                </p>
-              </button>
-            </div>
-
-            <div id="generation-status" class="mt-4"></div>
-          </section>
-          <!-- SECCIÓN 3: VISUALIZACIÓN DEL GRAFO -->
-          <section id="visualization-section" class="content-section hidden">
-            <div class="section-header">
-              <div>
-                <div class="section-heading">
-                  <div class="section-step-badge">3</div>
-                  <h2 class="section-title">Visualización del Grafo</h2>
-                </div>
-                <p class="section-subtitle section-subtitle-offset">
-                  Explora y edita el grafo generado
-                </p>
-              </div>
-            </div>
-
-            <div id="graph-info" class="card card-gradient mb-4 hidden">
-              <div class="card-body">
-                <div id="graph-stats"></div>
-              </div>
-            </div>
-
-            <div class="graph-wrapper mt-6">
-              <div id="graph-container"></div>
-
-              <!-- Toolbar flotante -->
-              <div class="floating-toolbar">
-                <button
-                  id="btn-fit-view"
-                  class="btn btn-icon btn-ghost"
-                  title="Ajustar vista"
-                >
-                  <i class="fi fi-rr-search icon" aria-hidden="true"></i>
-                </button>
-                <button
-                  id="btn-reset-view"
-                  class="btn btn-icon btn-ghost"
-                  title="Resetear vista"
-                >
-                  <i class="fi fi-rr-rotate-right icon" aria-hidden="true"></i>
-                </button>
-                <div class="toolbar-divider"></div>
-                <button
-                  id="btn-toggle-edit"
-                  class="btn btn-sm btn-warning"
-                  title="Activar modo edición"
-                >
-                  <i class="fi fi-rr-pencil icon" aria-hidden="true"></i>
-                  <span>Editar</span>
-                </button>
-                <button
-                  id="btn-clear-graph"
-                  class="btn btn-icon btn-danger hidden"
-                  title="Limpiar grafo"
-                >
-                  <i class="fi fi-rr-trash icon" aria-hidden="true"></i>
-                </button>
-              </div>
-            </div>
-
-            <div
-              id="edit-mode-info"
-              class="info-box info-box-warning mt-4 hidden"
-            >
-              <strong>
-                <i class="fi fi-rr-pencil icon" aria-hidden="true"></i>
-                <span>Modo edición activo</span>
-              </strong>
-              <ul class="list-relaxed">
-                <li>
-                  <strong>Click en el canvas</strong> → Agregar un nodo nuevo
-                </li>
-                <li>
-                  <strong>Click derecho en un nodo</strong> → Eliminar nodo
-                </li>
-                <li>
-                  <strong>Click en dos nodos</strong> → Conectar y asignar peso
-                </li>
-                <li><strong>Click en una arista</strong> → Cambiar su peso</li>
-                <li><strong>Límite:</strong> Máximo 16 nodos permitidos</li>
-              </ul>
-            </div>
-
-            <button
-              id="btn-continue-execution"
-              class="btn btn-primary btn-lg w-full mt-6 hidden"
-            >
-              <span>Continuar</span>
-              <i class="fi fi-rr-arrow-right icon" aria-hidden="true"></i>
-            </button>
-          </section>
-
-          <!-- SECCIÓN 4: CONTROLES DE EJECUCIÓN (Inicialmente oculta) -->
-          <section id="controls-section" class="content-section hidden">
-            <div class="section-header">
-              <div>
-                <div class="section-heading">
-                  <div class="section-step-badge">4</div>
-                  <h2 class="section-title">Ejecutar Algoritmo TSP</h2>
-                </div>
-                <p class="section-subtitle section-subtitle-offset">
-                  Configura la velocidad y ejecuta la optimización
-                </p>
-              </div>
-            </div>
-
-            <div class="card mt-6">
-              <div class="card-body">
-                <label class="form-label mb-4">
-                  <strong class="flex items-center gap-2">
-                    <i class="fi fi-rr-bolt icon" aria-hidden="true"></i>
-                    <span>Velocidad de ejecución</span>
-                  </strong>
-                </label>
-
-                <div class="speed-options mb-6">
-                  <label class="speed-option">
-                    <input
-                      type="radio"
-                      name="speed"
-                      value="fast"
-                      id="speed-fast"
-                      class="input-hidden"
-                    />
-                    <div class="speed-card" data-speed="fast" id="btn-fast">
-                      <div class="speed-icon">
-                        <i class="fi fi-rr-bolt icon-lg" aria-hidden="true"></i>
-                      </div>
-                      <div class="speed-name">Rápido</div>
-                      <div class="speed-desc">500ms/paso</div>
-                    </div>
-                  </label>
-
-                  <label class="speed-option">
-                    <input
-                      type="radio"
-                      name="speed"
-                      value="slow"
-                      id="speed-slow"
-                      checked
-                      class="input-hidden"
-                    />
-                    <div
-                      class="speed-card active"
-                      data-speed="slow"
-                      id="btn-slow"
-                    >
-                      <div class="speed-icon">
-                        <i
-                          class="fi fi-rr-hourglass icon-lg"
-                          aria-hidden="true"
-                        ></i>
-                      </div>
-                      <div class="speed-name">Lento</div>
-                      <div class="speed-desc">1s/paso</div>
-                    </div>
-                  </label>
-
-                  <label class="speed-option">
-                    <input
-                      type="radio"
-                      name="speed"
-                      value="manual"
-                      id="speed-manual"
-                      class="input-hidden"
-                    />
-                    <div
-                      class="speed-card"
-                      data-speed="manual"
-                      id="btn-manual-step"
-                    >
-                      <div class="speed-icon">
-                        <i
-                          class="fi fi-rr-hand-pointer icon-lg"
-                          aria-hidden="true"
-                        ></i>
-                      </div>
-                      <div class="speed-name">Manual</div>
-                      <div class="speed-desc">Click/paso</div>
-                    </div>
-                  </label>
-                </div>
-
-                <div class="info-box info-box-warning mb-6">
-                  <strong class="flex items-center gap-2">
-                    <i
-                      class="fi fi-rr-triangle-warning icon"
-                      aria-hidden="true"
-                    ></i>
-                    <span>Recomendación</span>
-                  </strong>
-                  <span>
-                    Para N &gt; 10, usa modo <strong>Lento</strong> o
-                    <strong>Manual</strong> para evitar congelamiento.
-                  </span>
-                </div>
-
-                <div id="manual-controls" class="hidden mb-6">
-                  <button id="btn-next-step" class="btn btn-outline w-full">
-                    <span>Siguiente paso</span>
-                    <i class="fi fi-rr-arrow-right icon" aria-hidden="true"></i>
-                  </button>
-                </div>
-
-                <button id="btn-execute" class="btn btn-xl w-full">
-                  <i class="fi fi-rr-play icon" aria-hidden="true"></i>
-                  <span>Ejecutar algoritmo</span>
-                </button>
-              </div>
-            </div>
-
-            <div id="execution-status" class="mt-4"></div>
-
-            <div id="progress-container" class="hidden mt-6">
-              <div class="progress-bar">
-                <div class="progress-fill" id="progress-fill"></div>
-              </div>
-              <div id="progress-text" class="progress-text">Progreso: 0%</div>
-            </div>
-          </section>
-
-          <!-- SECCIÓN 5: LOGS Y RESULTADOS (Inicialmente oculta) -->
-          <section id="results-section" class="content-section hidden">
-            <div class="section-header">
-              <div class="flex-1">
-                <div class="section-heading">
-                  <div class="section-step-badge section-step-badge-success">
-                    <i class="fi fi-rr-check icon" aria-hidden="true"></i>
-                  </div>
-                  <h2 class="section-title">Resultados</h2>
-                </div>
-                <p class="section-subtitle section-subtitle-offset">
-                  Registro detallado de la ejecución y métricas obtenidas
-                </p>
-              </div>
-              <button id="btn-clear-logs" class="btn btn-outline btn-sm">
-                <i class="fi fi-rr-trash icon" aria-hidden="true"></i>
-                <span>Limpiar</span>
-              </button>
-            </div>
-
-            <div class="logs-wrapper mt-6">
-              <div class="logs-header">
-                <span
-                  class="font-bold text-success-light flex items-center gap-2"
-                >
-                  <i class="fi fi-rr-clipboard icon" aria-hidden="true"></i>
-                  <span>Terminal</span>
-                </span>
-                <span class="text-xs text-neutral-400">
-                  GreenCircuit v2.0
-                </span>
-              </div>
-              <div id="log-container"></div>
-            </div>
-          </section>
+      </section>
+      <section id="problema" class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow">01 — PROBLEMA</p>
+            <h2>Visitar cada punto una sola vez y volver al origen.</h2>
+            <p>
+              Es el problema del agente viajero (TSP) sobre un grafo completo y no dirigido. Los
+              pesos son distancias euclidianas entre puntos del plano.
+            </p>
+          </div>
+          <div class="problem-grid">
+            <article>
+              <p class="eyebrow">NODOS</p>
+              <p class="formula">V = {A, B, …}</p>
+              <p>Puntos de recolección. El primero (A) es el origen.</p>
+            </article>
+            <article>
+              <p class="eyebrow">ARISTAS</p>
+              <p class="formula">w(i, j) = ‖pᵢ − pⱼ‖ · 0.01</p>
+              <p>Distancia en km. Matriz simétrica, diagonal nula.</p>
+            </article>
+            <article>
+              <p class="eyebrow">OBJETIVO</p>
+              <p class="formula">min C(π)</p>
+              <p>π recorre todos los nodos una vez y vuelve a A.</p>
+            </article>
+          </div>
         </div>
-      </main>
-
-      <!-- FOOTER COMPACTO -->
-      <footer class="app-footer app-footer--compact">
-        <div>
-          <p class="text-secondary mb-0 flex items-center gap-2">
-            <i class="fi fi-rr-leaf icon" aria-hidden="true"></i>
-            <span
-              ><strong>GreenCircuit</strong> - Optimización de Rutas TSP ·
-              2025</span
-            >
+      </section>
+      <section id="metodo" class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow">02 — MÉTODO</p>
+            <h2>Backtracking sobre todos los ciclos hamiltonianos.</h2>
+            <p>
+              No hay heurísticas: se recorren todas las permutaciones de los nodos restantes y se
+              guarda la de menor costo. Es exacto, y por eso mismo crece factorialmente.
+            </p>
+          </div>
+          <div class="cards phases">
+            <article>
+              <div class="card-top">
+                <span class="eyebrow">FASE 1</span>
+                <span>O(N²)</span>
+              </div>
+              <h3>Matriz de adyacencia</h3>
+              <p>Se precalcula w(i, j) para consultas en O(1).</p>
+            </article>
+            <article>
+              <div class="card-top">
+                <span class="eyebrow">FASE 2</span>
+                <span>O((N−1)!)</span>
+              </div>
+              <h3>Backtracking desde A</h3>
+              <p>
+                Se extiende la ruta con cada nodo no visitado y se retrocede al completar o agotar
+                opciones.
+              </p>
+            </article>
+            <article>
+              <div class="card-top">
+                <span class="eyebrow">FASE 3</span>
+                <span>O(N) por ciclo</span>
+              </div>
+              <h3>Evaluación</h3>
+              <p>Cada ciclo suma sus N aristas; si mejora al óptimo actual, lo reemplaza.</p>
+            </article>
+          </div>
+          <div class="equation">
+            C(π) = w(π₀, π₁) + w(π₁, π₂) + … + w(πₙ₋₁, π₀)
+            <br />
+            π* = argmin C(π), π ∈ permutaciones de {B, …, N} precedidas por A
+            <br />
+            |ciclos| = (N − 1)! · cada recorrido aparece dos veces (y su inverso)
+          </div>
+        </div>
+      </section>
+      <section id="complejidad" class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow">03 — COMPLEJIDAD</p>
+            <h2>El muro factorial.</h2>
+            <p>
+              Cada punto extra multiplica el trabajo por N − 1. Por eso la app limita N a 11: más
+              allá, el navegador tardaría minutos u horas en terminar.
+            </p>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>N</th>
+                  <th>(N − 1)!</th>
+                  <th>ESCALA (LOG₁₀)</th>
+                  <th>TIEMPO ESTIMADO*</th>
+                  <th>ESTADO</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>4</td>
+                  <td>6</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 8.8%" aria-hidden="true"></span>
+                  </td>
+                  <td>&lt; 1 ms</td>
+                  <td>Instantáneo</td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td>120</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 23.1%" aria-hidden="true"></span>
+                  </td>
+                  <td>&lt; 1 ms</td>
+                  <td>Instantáneo</td>
+                </tr>
+                <tr>
+                  <td>8</td>
+                  <td>5 040</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 41.2%" aria-hidden="true"></span>
+                  </td>
+                  <td>~0.05 s</td>
+                  <td>Valor por defecto</td>
+                </tr>
+                <tr>
+                  <td>9</td>
+                  <td>40 320</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 51.2%" aria-hidden="true"></span>
+                  </td>
+                  <td>~0.4 s</td>
+                  <td>Sin aviso</td>
+                </tr>
+                <tr class="warn">
+                  <td>10</td>
+                  <td>362 880</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 61.7%" aria-hidden="true"></span>
+                  </td>
+                  <td>~4 s</td>
+                  <td>Avisa antes de ejecutar</td>
+                </tr>
+                <tr class="warn">
+                  <td>11</td>
+                  <td>3 628 800</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 72.8%" aria-hidden="true"></span>
+                  </td>
+                  <td>~36 s</td>
+                  <td>Límite de la app</td>
+                </tr>
+                <tr>
+                  <td>12</td>
+                  <td>39 916 800</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 84.5%" aria-hidden="true"></span>
+                  </td>
+                  <td>~7 min</td>
+                  <td>Fuera de alcance</td>
+                </tr>
+                <tr>
+                  <td>13</td>
+                  <td>479 001 600</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 96.5%" aria-hidden="true"></span>
+                  </td>
+                  <td>~1.3 h</td>
+                  <td>Fuera de alcance</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">
+            * Estimación a ~10⁵ ciclos/s. La app mide la tasa real durante la ejecución y actualiza
+            el tiempo restante.
           </p>
         </div>
-      </footer>
-    </div>
-    <!-- Fin del app-container -->
-
-    <div
-      id="toast-stack"
-      class="toast-stack"
-      aria-live="polite"
-      aria-atomic="true"
-    ></div>
-
-    <!-- JavaScript - Orden de carga importante (clases primero, luego app.js) -->
-    <script src="src/js/Graph.js"></script>
-    <script src="src/js/RandomGenerator.js"></script>
-    <script src="src/js/HamiltonianFinder.js"></script>
-    <script src="src/js/TSPSolver.js"></script>
-    <script src="src/js/CytoscapeRenderer.js"></script>
-    <script src="src/js/LogDisplay.js"></script>
-    <script src="src/js/GraphEditor.js"></script>
-    <script src="src/js/app.js"></script>
+      </section>
+      <section class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow">04 — MÉTRICAS DERIVADAS</p>
+            <h2>De kilómetros a minutos y emisiones.</h2>
+            <p>
+              Dos supuestos fijos convierten la distancia de la ruta en indicadores operativos. Se
+              muestran junto al resultado, con sus valores reales.
+            </p>
+          </div>
+          <div class="cards metrics">
+            <article>
+              <p class="eyebrow">TIEMPO</p>
+              <p class="formula">t = d / v × 60</p>
+              <p>v = 25 km/h, velocidad media urbana del camión</p>
+              <p class="example">
+                Ej.
+                <span>18.16 km → 43.58 min</span>
+              </p>
+            </article>
+            <article>
+              <p class="eyebrow">EMISIONES</p>
+              <p class="formula">CO₂ = d × e</p>
+              <p>e = 0.2 kg/km, factor de emisión por kilómetro</p>
+              <p class="example">
+                Ej.
+                <span>18.16 km → 3.63 kg</span>
+              </p>
+            </article>
+            <article>
+              <p class="eyebrow">AHORRO</p>
+              <p class="formula">Δ = C(π_peor) − C(π*)</p>
+              <p>Se compara contra la peor ruta encontrada</p>
+              <p class="example">
+                Ej.
+                <span>38.88 − 18.16 = 20.72 km</span>
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section id="arquitectura" class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow">05 — ARQUITECTURA</p>
+            <h2>Módulos pequeños, sin backend.</h2>
+            <p>
+              Todo corre en el navegador con JavaScript sin frameworks. El grafo es la única fuente
+              de verdad; los algoritmos no conocen la interfaz.
+            </p>
+          </div>
+          <div class="flow">
+            <div class="flow-group">
+              <article>
+                <strong>RandomGenerator</strong>
+                <p>Layouts aleatorio, circular y cuadrícula</p>
+              </article>
+              <article>
+                <strong>EditMode</strong>
+                <p>Mover nodos y editar pesos a mano</p>
+              </article>
+            </div>
+            <span aria-hidden="true">→</span>
+            <article class="central">
+              <strong>Graph</strong>
+              <p>Nodos, aristas y matriz de adyacencia</p>
+            </article>
+            <span aria-hidden="true">→</span>
+            <article>
+              <strong>SearchEngine</strong>
+              <p>Backtracking desde A; solo guarda el costo de cada ciclo</p>
+            </article>
+            <span aria-hidden="true">→</span>
+            <article>
+              <strong>Playback</strong>
+              <p>Avanza la búsqueda por cuadro según la velocidad</p>
+            </article>
+            <span aria-hidden="true">→</span>
+            <div class="flow-group">
+              <article>
+                <strong>GraphView</strong>
+                <p>Dibuja el grafo y la ruta con Cytoscape.js</p>
+              </article>
+              <article>
+                <strong>Inspector · Trace</strong>
+                <p>Matriz, ruta actual y tabla exportable</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="wrap footer">
+      <div>
+        <p>Tourbench · 2025 · Licencia MIT</p>
+        <p>
+          Proyecto académico publicado como referencia. Reutilizarlo en entregas calificadas queda
+          bajo tu criterio y las políticas de tu institución.
+        </p>
+      </div>
+      <nav aria-label="Enlaces del pie">
+        <a href="app.html">Abrir la app</a>
+        <a href="https://github.com/trinity-bytes/green-circuit">Código fuente</a>
+        <a href="https://github.com/trinity-bytes/green-circuit#readme">README</a>
+        <button type="button" class="footer-about" data-about-open>Acerca de</button>
+      </nav>
+    </footer>
+    <dialog class="about" id="about" aria-labelledby="about-title">
+      <div class="about-body">
+        <div class="about-head">
+          <svg width="24" height="24" aria-hidden="true">
+            <use href="assets/icons.svg#brand-mark"></use>
+          </svg>
+          <h2 id="about-title">Acerca de Tourbench</h2>
+        </div>
+        <p>
+          Proyecto académico de teoría de grafos: encuentra la ruta de recolección más corta
+          evaluando por fuerza bruta todos los ciclos hamiltonianos que parten del origen.
+        </p>
+        <div>
+          <h3 class="about-label">AUTOR · JAHAT TRINIDAD</h3>
+          <ul class="about-links">
+            <li>
+              <a href="https://jahattrinidad.com" target="_blank" rel="noopener">
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-arrow-up-right"></use>
+                </svg>
+                <strong>Sitio web</strong>
+                <span>jahattrinidad.com</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/trinity-bytes" target="_blank" rel="noopener">
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-github"></use>
+                </svg>
+                <strong>GitHub</strong>
+                <span>@trinity-bytes</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://github.com/trinity-bytes/green-circuit"
+                target="_blank"
+                rel="noopener"
+              >
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-github"></use>
+                </svg>
+                <strong>Código fuente</strong>
+                <span>green-circuit</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="about-footer">
+        <span>2025 · Licencia MIT</span>
+        <button type="button" data-about-close>Cerrar</button>
+      </div>
+    </dialog>
+    <script src="src/js/about.js"></script>
   </body>
 </html>
