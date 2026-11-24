@@ -67,7 +67,7 @@ npm test   # node --test, sin dependencias
 ```text
 root
 ├─ index.html      (página del proyecto, raíz del sitio)
-├─ app.html        (la app, /app en Cloudflare Pages)
+├─ app.html        (la app, /app en GitHub Pages)
 ├─ package.json
 ├─ assets/
 │  ├─ icons.svg
