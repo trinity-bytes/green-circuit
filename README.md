@@ -148,16 +148,16 @@ Cubren el motor de búsqueda: cantidad de ciclos, óptimo frente a una implement
 
 ## Despliegue
 
-El sitio es estático: no necesita build. En **Cloudflare Pages**:
+El sitio es estático: no necesita build. Se publica con **GitHub Pages** desde la rama `main` (raíz del repo), y cada push a `main` lo actualiza.
 
-| Ajuste                 | Valor                         |
-| ---------------------- | ----------------------------- |
-| Framework preset       | `None`                        |
-| Build command          | _(vacío)_                     |
-| Build output directory | `/`                           |
-| Dominio personalizado  | `tourbench.jahattrinidad.com` |
+| Ajuste                | Valor                                                                         |
+| --------------------- | ----------------------------------------------------------------------------- |
+| Origen                | Rama `main`, carpeta `/`                                                      |
+| Dominio personalizado | `tourbench.jahattrinidad.com` (archivo `CNAME`)                               |
+| DNS                   | `CNAME tourbench → trinity-bytes.github.io` en Cloudflare, en modo _DNS only_ |
+| HTTPS                 | Certificado emitido por GitHub Pages                                          |
 
-Pages sirve `index.html` en `/` y `app.html` en `/app`.
+`index.html` se sirve en `/` y `app.html` en `/app`.
 
 ## Estructura
 

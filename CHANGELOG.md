@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y versionado [SemVer](https://semver.org/lang/es/).
 
+## [1.0.1] - 2026-11-24
+
+### Cambiado
+
+- Publicación con GitHub Pages en `tourbench.jahattrinidad.com` (archivo `CNAME`); la documentación de despliegue ya no menciona Cloudflare Pages.
+
 ## [1.0.0] - 2026-11-24
 
 Primera versión publicada como **Tourbench** en [tourbench.jahattrinidad.com](https://tourbench.jahattrinidad.com).
@@ -32,4 +38,5 @@ Primera versión publicada como **Tourbench** en [tourbench.jahattrinidad.com](h
 - Wizard de 4 pasos, consola de logs y los módulos `HamiltonianFinder`, `TSPSolver`, `LogDisplay`, `CytoscapeRenderer` y `GraphEditor`.
 - Hojas de estilo anteriores y Font Awesome.
 
+[1.0.1]: https://github.com/trinity-bytes/green-circuit/releases/tag/v1.0.1
 [1.0.0]: https://github.com/trinity-bytes/green-circuit/releases/tag/v1.0.0
