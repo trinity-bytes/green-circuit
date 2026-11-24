@@ -1,0 +1,11 @@
+{
+  "name": "tourbench",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Búsqueda exhaustiva del TSP, paso a paso.",
+  "homepage": "https://tourbench.jahattrinidad.com",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test"
+  }
+}
