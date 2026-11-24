@@ -1,0 +1,107 @@
+/* About dialog shared by index.html and landing.html. Uses tokens from tokens.css. */
+
+.about {
+  width: min(440px, calc(100vw - 32px));
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-panel);
+  color: var(--text);
+  box-shadow: 0 20px 80px color-mix(in srgb, var(--text) 25%, transparent);
+}
+
+.about::backdrop {
+  background: color-mix(in srgb, var(--text) 40%, transparent);
+}
+
+.about-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+}
+
+.about-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.about-head h2 {
+  margin: 0;
+  font: var(--type-title-m);
+  letter-spacing: var(--track-title-m);
+}
+
+.about-body p {
+  margin: 0;
+  font: var(--type-body-s);
+  color: var(--text-meta);
+}
+
+.about-label {
+  margin: 0 0 8px;
+  font: var(--type-label-caps);
+  letter-spacing: var(--track-label-caps);
+  color: var(--text-meta);
+}
+
+.about-links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border);
+}
+
+.about-links a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.about-links a:hover {
+  background: var(--bg-sunken);
+}
+
+.about-links strong {
+  font: var(--type-label-s);
+}
+
+.about-links span {
+  margin-left: auto;
+  font: var(--type-mono-s);
+  color: var(--text-meta);
+}
+
+.about-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  border-top: 1px solid var(--border);
+  font: var(--type-mono-s);
+  color: var(--text-meta);
+}
+
+.about-footer button {
+  padding: 6px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  background: none;
+  color: var(--text);
+  font: var(--type-label-s);
+  cursor: pointer;
+}
+
+.about-footer button:hover {
+  background: var(--bg-sunken);
+}
+
+.about :focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}

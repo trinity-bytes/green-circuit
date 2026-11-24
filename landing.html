@@ -10,6 +10,7 @@
     <title>GreenCircuit — La ruta más corta</title>
     <link rel="stylesheet" href="src/styles/tokens.css" />
     <link rel="stylesheet" href="src/styles/landing.css" />
+    <link rel="stylesheet" href="src/styles/about.css" />
   </head>
   <body>
     <header class="site-header">
@@ -412,7 +413,63 @@
         <a href="index.html">Abrir la app</a>
         <a href="https://github.com/trinity-bytes/green-circuit">Código fuente</a>
         <a href="https://github.com/trinity-bytes/green-circuit#readme">README</a>
+        <button type="button" class="footer-about" data-about-open>Acerca de</button>
       </nav>
     </footer>
+    <dialog class="about" id="about" aria-labelledby="about-title">
+      <div class="about-body">
+        <div class="about-head">
+          <svg width="24" height="24" aria-hidden="true">
+            <use href="assets/icons.svg#brand-mark"></use>
+          </svg>
+          <h2 id="about-title">Acerca de GreenCircuit</h2>
+        </div>
+        <p>
+          Proyecto académico de teoría de grafos: encuentra la ruta de recolección más corta
+          evaluando por fuerza bruta todos los ciclos hamiltonianos que parten del origen.
+        </p>
+        <div>
+          <h3 class="about-label">AUTOR · JAHAT TRINIDAD</h3>
+          <ul class="about-links">
+            <li>
+              <a href="https://jahattrinidad.com" target="_blank" rel="noopener">
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-arrow-up-right"></use>
+                </svg>
+                <strong>Sitio web</strong>
+                <span>jahattrinidad.com</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/trinity-bytes" target="_blank" rel="noopener">
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-github"></use>
+                </svg>
+                <strong>GitHub</strong>
+                <span>@trinity-bytes</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://github.com/trinity-bytes/green-circuit"
+                target="_blank"
+                rel="noopener"
+              >
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-github"></use>
+                </svg>
+                <strong>Código fuente</strong>
+                <span>green-circuit</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="about-footer">
+        <span>2025 · Licencia MIT</span>
+        <button type="button" data-about-close>Cerrar</button>
+      </div>
+    </dialog>
+    <script src="src/js/about.js"></script>
   </body>
 </html>

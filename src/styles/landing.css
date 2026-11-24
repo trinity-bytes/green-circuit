@@ -472,6 +472,20 @@ td:nth-child(4) {
   font: var(--type-label-s);
 }
 
+/* Footer "Acerca de" trigger looks like the sibling links */
+.footer-about {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.footer-about:hover {
+  text-decoration: underline;
+}
+
 /* Responsive layouts */
 @media (max-width: 1100px) {
   .hero {

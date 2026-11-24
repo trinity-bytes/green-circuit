@@ -6,6 +6,7 @@
     <title>GreenCircuit — Search Bench</title>
     <link rel="stylesheet" href="src/styles/tokens.css" />
     <link rel="stylesheet" href="src/styles/app.css" />
+    <link rel="stylesheet" href="src/styles/about.css" />
     <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
   </head>
   <body>
@@ -52,7 +53,12 @@
           <svg class="icon" width="16" height="16" aria-hidden="true">
             <use href="assets/icons.svg#icon-regenerate"></use>
           </svg></button
-        ><button id="edit">✎ &nbsp; Editar grafo</button>
+        ><button id="edit">
+          <svg class="icon" width="16" height="16" aria-hidden="true">
+            <use href="assets/icons.svg#icon-pencil"></use>
+          </svg>
+          Editar grafo
+        </button>
         <div class="grow"></div>
         <span class="mono" id="complexity"></span
         ><button id="restart" hidden>
@@ -60,7 +66,8 @@
             <use href="assets/icons.svg#icon-regenerate"></use>
           </svg>
           Reiniciar</button
-        ><span class="divider"></span><a href="landing.html">Acerca del proyecto</a
+        ><span class="divider"></span
+        ><button type="button" data-about-open>Acerca del proyecto</button
         ><a
           href="https://github.com/trinity-bytes/green-circuit"
           aria-label="Código fuente en GitHub"
@@ -169,6 +176,69 @@
         </aside>
       </main>
     </div>
+    <dialog class="about" id="about" aria-labelledby="about-title">
+      <div class="about-body">
+        <div class="about-head">
+          <svg width="24" height="24" aria-hidden="true">
+            <use href="assets/icons.svg#brand-mark"></use>
+          </svg>
+          <h2 id="about-title">Acerca de GreenCircuit</h2>
+        </div>
+        <p>
+          Proyecto académico de teoría de grafos: encuentra la ruta de recolección más corta
+          evaluando por fuerza bruta todos los ciclos hamiltonianos que parten del origen.
+        </p>
+        <div>
+          <h3 class="about-label">AUTOR · JAHAT TRINIDAD</h3>
+          <ul class="about-links">
+            <li>
+              <a href="https://jahattrinidad.com" target="_blank" rel="noopener">
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-arrow-up-right"></use>
+                </svg>
+                <strong>Sitio web</strong>
+                <span>jahattrinidad.com</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/trinity-bytes" target="_blank" rel="noopener">
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-github"></use>
+                </svg>
+                <strong>GitHub</strong>
+                <span>@trinity-bytes</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://github.com/trinity-bytes/green-circuit"
+                target="_blank"
+                rel="noopener"
+              >
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-github"></use>
+                </svg>
+                <strong>Código fuente</strong>
+                <span>green-circuit</span>
+              </a>
+            </li>
+            <li>
+              <a href="landing.html">
+                <svg class="icon" width="16" height="16" aria-hidden="true">
+                  <use href="assets/icons.svg#icon-info"></use>
+                </svg>
+                <strong>Página del proyecto</strong>
+                <span>landing.html</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="about-footer">
+        <span>2025 · Licencia MIT</span>
+        <button type="button" data-about-close>Cerrar</button>
+      </div>
+    </dialog>
     <dialog id="confirm">
       <h2 id="confirm-title">Ejecutar con N = 11</h2>
       <p>
@@ -206,6 +276,7 @@
     <script src="src/js/TracePanel.js"></script>
     <script src="src/js/Playback.js"></script>
     <script src="src/js/AppView.js"></script>
+    <script src="src/js/about.js"></script>
     <script src="src/js/app.js"></script>
   </body>
 </html>
