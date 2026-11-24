@@ -1,0 +1,69 @@
+/* ============================================================================
+   GreenCircuit — design tokens ("Search Bench", Catppuccin Latte)
+   Source of truth: Figma file eGk9jUSvDROZUM7d68Yrtk, page "02 — Foundations".
+   Shared by index.html (app) and landing.html.
+   ============================================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap");
+
+:root {
+  color-scheme: light;
+
+  /* Catppuccin Latte palette */
+  --latte-base: #eff1f5;
+  --latte-mantle: #e6e9ef;
+  --latte-crust: #dce0e8;
+  --latte-surface0: #ccd0da;
+  --latte-surface1: #bcc0cc;
+  --latte-surface2: #acb0be;
+  --latte-overlay1: #8c8fa1;
+  --latte-subtext0: #6c6f85;
+  --latte-subtext1: #5c5f77;
+  --latte-text: #4c4f69;
+  --latte-green: #40a02b;
+  --latte-blue: #1e66f5;
+  --latte-yellow: #df8e1d;
+  --latte-red: #d20f39;
+
+  /* Roles
+     - Subtext0 / Overlay1 fail WCAG AA for small text: graphics only.
+     - Green marks the best route ONLY and is used for strokes, never text.
+     - Blue marks the route being explored and the active matrix cell. */
+  --bg: var(--latte-base);
+  --bg-panel: var(--latte-mantle);
+  --bg-sunken: var(--latte-crust);
+  --border: var(--latte-surface0);
+  --border-strong: var(--latte-surface2);
+  --text: var(--latte-text);
+  --text-meta: var(--latte-subtext1);
+  --graphic-muted: var(--latte-overlay1);
+  --route-best: var(--latte-green);
+  --route-active: var(--latte-blue);
+  --focus-ring: var(--latte-blue);
+  --warning: var(--latte-yellow);
+  --danger: var(--latte-red);
+
+  /* Typography */
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Text styles: size / line-height / weight / tracking */
+  --type-display-xl: 600 56px/62px var(--font-sans);
+  --track-display-xl: -0.015em;
+  --type-display-l: 600 36px/43px var(--font-sans);
+  --track-display-l: -0.008em;
+  --type-title-m: 600 20px/26px var(--font-sans);
+  --track-title-m: -0.002em;
+  --type-title-s: 600 14px/20px var(--font-sans);
+  --type-body-m: 400 16px/26px var(--font-sans);
+  --type-body-s: 400 13px/20px var(--font-sans);
+  --type-label-s: 500 13px/18px var(--font-sans);
+  --type-label-caps: 500 11px/15px var(--font-mono);
+  --track-label-caps: 0.06em;
+  --type-mono-s: 400 12px/18px var(--font-mono);
+  --type-mono-m: 400 13px/20px var(--font-mono);
+  --type-mono-value: 500 24px/29px var(--font-mono);
+  --track-mono-value: -0.01em;
+  --type-mono-hero: 500 40px/48px var(--font-mono);
+  --track-mono-hero: -0.02em;
+}

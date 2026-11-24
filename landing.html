@@ -1,636 +1,418 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GreenCircuit - Optimización de Rutas TSP</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Optimización de rutas de recolección de residuos urbanos usando el Problema del Agente Viajero"
+      content="GreenCircuit explora la ruta de recolección más corta mediante grafos y fuerza bruta."
     />
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="src/styles/main.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css"
-    />
-
-    <style>
-      body {
-        background: linear-gradient(
-          135deg,
-          rgba(227, 245, 235, 0.9) 0%,
-          rgba(219, 239, 252, 0.85) 100%
-        );
-        min-height: 100vh;
-      }
-
-      .landing-container {
-        max-width: 1180px;
-        margin: 0 auto;
-        padding: var(--spacing-8) var(--spacing-6) var(--spacing-12);
-      }
-
-      .landing-hero {
-        text-align: center;
-        padding: var(--spacing-12) 0 var(--spacing-10);
-        animation: fadeInUp 0.7s ease-out;
-      }
-
-      .landing-hero h1 {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-2);
-        font-size: var(--font-size-5xl);
-        background: var(--gradient-primary);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: var(--spacing-4);
-        font-weight: var(--font-weight-extrabold);
-      }
-
-      .hero-icon {
-        font-size: var(--font-size-4xl);
-      }
-
-      .landing-hero .subtitle {
-        font-size: var(--font-size-xl);
-        font-weight: var(--font-weight-semibold);
-        color: rgba(20, 60, 40, 0.88);
-        margin-bottom: var(--spacing-3);
-      }
-
-      .landing-hero .description {
-        font-size: var(--font-size-base);
-        color: var(--color-text-secondary);
-        max-width: 720px;
-        margin: 0 auto var(--spacing-8);
-        line-height: var(--line-height-relaxed);
-      }
-
-      .cta-button {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-2);
-        padding: var(--spacing-5) var(--spacing-8);
-        font-size: var(--font-size-xl);
-        font-weight: var(--font-weight-bold);
-        background: var(--gradient-success);
-        color: white;
-        border: none;
-        border-radius: var(--radius-full);
-        cursor: pointer;
-        box-shadow: var(--shadow-xl);
-        transition: all var(--transition-base);
-        text-decoration: none;
-      }
-
-      .cta-button:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-2xl);
-      }
-
-      .landing-section {
-        background: rgba(255, 255, 255, 0.9);
-        padding: var(--spacing-10) var(--spacing-8);
-        border-radius: var(--radius-2xl);
-        box-shadow: 0 20px 50px rgba(29, 58, 45, 0.12);
-        margin-bottom: var(--spacing-10);
-        animation: fadeInUp 0.8s ease-out;
-      }
-
-      .landing-section + .landing-section {
-        animation-delay: 0.15s;
-      }
-
-      .section-heading {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: var(--spacing-2);
-        margin-bottom: var(--spacing-6);
-      }
-
-      .section-heading h2 {
-        font-size: var(--font-size-3xl);
-        color: rgba(12, 53, 36, 0.92);
-      }
-
-      .section-heading p {
-        max-width: 680px;
-        color: var(--color-text-secondary);
-        line-height: var(--line-height-relaxed);
-      }
-
-      .section-heading .section-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 60px;
-        height: 60px;
-        border-radius: var(--radius-full);
-        background: var(--color-primary-50);
-        color: var(--color-primary-600);
-        font-size: var(--font-size-2xl);
-      }
-
-      .section-columns {
-        display: grid;
-        gap: var(--spacing-6);
-      }
-
-      .section-columns--two {
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      }
-
-      .section-block {
-        background: rgba(243, 249, 246, 0.9);
-        border: 1px solid rgba(76, 175, 80, 0.12);
-        border-radius: var(--radius-xl);
-        padding: var(--spacing-5) var(--spacing-6);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
-      }
-
-      .section-block h3 {
-        font-size: var(--font-size-xl);
-        color: rgba(12, 53, 36, 0.9);
-        margin-bottom: var(--spacing-2);
-      }
-
-      .section-block p,
-      .section-block li {
-        color: var(--color-text-secondary);
-        line-height: var(--line-height-relaxed);
-        font-size: var(--font-size-sm);
-      }
-
-      .pill-list {
-        list-style: none;
-        margin: var(--spacing-3) 0 0;
-        padding: 0;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--spacing-2);
-      }
-
-      .pill {
-        padding: var(--spacing-2) var(--spacing-4);
-        border-radius: var(--radius-full);
-        background: rgba(76, 175, 80, 0.12);
-        font-size: var(--font-size-xs);
-        font-weight: var(--font-weight-medium);
-        color: rgba(12, 53, 36, 0.8);
-      }
-
-      .timeline {
-        display: grid;
-        gap: var(--spacing-4);
-        position: relative;
-      }
-
-      .timeline::before {
-        content: "";
-        position: absolute;
-        top: var(--spacing-2);
-        bottom: var(--spacing-2);
-        left: 24px;
-        width: 2px;
-        background: linear-gradient(
-          180deg,
-          rgba(76, 175, 80, 0.35),
-          rgba(33, 150, 243, 0.35)
-        );
-      }
-
-      .timeline-item {
-        display: grid;
-        grid-template-columns: 60px 1fr;
-        gap: var(--spacing-4);
-        position: relative;
-        padding: var(--spacing-4) var(--spacing-4) var(--spacing-4)
-          var(--spacing-2);
-        border-radius: var(--radius-lg);
-        background: rgba(255, 255, 255, 0.8);
-        box-shadow: 0 10px 25px rgba(16, 56, 36, 0.08);
-      }
-
-      .timeline-number {
-        width: 52px;
-        height: 52px;
-        border-radius: var(--radius-full);
-        background: var(--gradient-primary);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: var(--font-size-lg);
-        font-weight: var(--font-weight-bold);
-        box-shadow: var(--shadow-md);
-        position: relative;
-        z-index: 1;
-      }
-
-      .metrics-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: var(--spacing-5);
-      }
-
-      .metric-card {
-        padding: var(--spacing-5);
-        border-radius: var(--radius-xl);
-        background: rgba(33, 150, 243, 0.09);
-        border: 1px solid rgba(33, 150, 243, 0.18);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
-        text-align: center;
-      }
-
-      .metric-card h3 {
-        font-size: var(--font-size-lg);
-        margin-bottom: var(--spacing-2);
-        color: rgba(12, 53, 36, 0.92);
-      }
-
-      .metric-card p {
-        font-size: var(--font-size-sm);
-        color: var(--color-text-secondary);
-        line-height: var(--line-height-relaxed);
-      }
-
-      .about-text {
-        max-width: 820px;
-        margin: 0 auto;
-        color: var(--color-text-secondary);
-        line-height: var(--line-height-relaxed);
-        font-size: var(--font-size-sm);
-        display: grid;
-        gap: var(--spacing-3);
-        text-align: center;
-      }
-
-      .landing-footer {
-        background: rgba(8, 28, 18, 0.92);
-        color: rgba(255, 255, 255, 0.82);
-        border-radius: var(--radius-2xl);
-        padding: var(--spacing-8) var(--spacing-6);
-        margin-top: var(--spacing-12);
-      }
-
-      .footer-columns {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: var(--spacing-6);
-        align-items: start;
-      }
-
-      .footer-brand h3 {
-        font-size: var(--font-size-xl);
-        margin-bottom: var(--spacing-2);
-      }
-
-      .footer-nav ul,
-      .footer-meta ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: grid;
-        gap: var(--spacing-2);
-        font-size: var(--font-size-sm);
-      }
-
-      .footer-nav a,
-      .footer-meta a {
-        color: rgba(255, 255, 255, 0.82);
-        text-decoration: none;
-        transition: color var(--transition-fast);
-      }
-
-      .footer-nav a:hover,
-      .footer-meta a:hover {
-        color: white;
-      }
-
-      .footer-bottom {
-        margin-top: var(--spacing-6);
-        padding-top: var(--spacing-4);
-        border-top: 1px solid rgba(255, 255, 255, 0.16);
-        font-size: var(--font-size-xs);
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--spacing-3);
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      @media (max-width: 768px) {
-        .landing-hero h1 {
-          font-size: var(--font-size-3xl);
-        }
-
-        .landing-hero .subtitle {
-          font-size: var(--font-size-lg);
-        }
-
-        .landing-section {
-          padding: var(--spacing-8) var(--spacing-5);
-        }
-
-        .timeline::before {
-          left: 12px;
-        }
-
-        .timeline-item {
-          grid-template-columns: 48px 1fr;
-        }
-      }
-    </style>
+    <title>GreenCircuit — La ruta más corta</title>
+    <link rel="stylesheet" href="src/styles/tokens.css" />
+    <link rel="stylesheet" href="src/styles/landing.css" />
   </head>
   <body>
-    <div class="landing-container">
-      <!-- HERO SECTION -->
-      <section class="landing-hero">
-        <h1>
-          <span class="hero-icon">
-            <i class="fi fi-rr-leaf icon-xl" aria-hidden="true"></i>
-          </span>
-          GreenCircuit
-        </h1>
-        <p class="subtitle">
-          Optimización de Rutas de Recolección de Residuos Urbanos
-        </p>
-        <p class="description">
-          Aplicación web interactiva que utiliza el
-          <strong>Problema del Agente Viajero (TSP)</strong>
-          para optimizar rutas de recolección de residuos, contribuyendo a la
-          sostenibilidad urbana mediante la reducción de distancias recorridas,
-          consumo de combustible y emisiones de CO₂.
-        </p>
-        <a href="index.html" class="cta-button">
-          <span class="cta-icon">
-            <i class="fi fi-rr-rocket icon" aria-hidden="true"></i>
-          </span>
-          <span>Abrir Aplicación</span>
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-              clip-rule="evenodd"
-            />
+    <header class="site-header">
+      <nav class="wrap nav" aria-label="Navegación principal">
+        <a class="brand" href="landing.html">
+          <svg class="icon" width="24" height="24" aria-hidden="true">
+            <use href="assets/icons.svg#brand-mark"></use>
           </svg>
+          GreenCircuit
         </a>
-      </section>
-
-      <!-- VISIÓN GENERAL -->
-      <section class="landing-section" id="vision">
-        <div class="section-heading">
-          <span class="section-icon">
-            <i class="fi fi-rr-bullseye" aria-hidden="true"></i>
-          </span>
-          <h2>¿Por qué elegir GreenCircuit?</h2>
+        <div class="nav-links">
+          <a href="#problema">Problema</a>
+          <a href="#metodo">Método</a>
+          <a href="#complejidad">Complejidad</a>
+          <a href="#arquitectura">Arquitectura</a>
+        </div>
+        <div class="actions">
+          <a class="button ghost nav-github" href="https://github.com/trinity-bytes/green-circuit">
+            <svg class="icon" width="16" height="16" aria-hidden="true">
+              <use href="assets/icons.svg#icon-github"></use>
+            </svg>
+            GitHub
+          </a>
+          <a class="button primary" href="index.html">
+            <svg class="icon" width="16" height="16" aria-hidden="true">
+              <use href="assets/icons.svg#icon-arrow-up-right"></use>
+            </svg>
+            Abrir la app
+          </a>
+        </div>
+      </nav>
+    </header>
+    <main>
+      <section class="hero wrap">
+        <div class="hero-copy">
+          <p class="eyebrow">PROYECTO ACADÉMICO · TEORÍA DE GRAFOS</p>
+          <h1>La ruta de recolección más corta, encontrada por fuerza bruta.</h1>
           <p>
-            Centraliza la planificación de recolección de residuos en una sola
-            experiencia: desde la modelación del grafo hasta la ejecución y
-            análisis de resultados, con foco en eficiencia y sostenibilidad.
+            GreenCircuit modela los puntos de recolección como un grafo completo, enumera los (N−1)!
+            ciclos hamiltonianos que parten del origen y conserva el de menor costo. Cada paso queda
+            a la vista: la ruta evaluada, su suma y la celda de la matriz que la produce.
           </p>
-        </div>
-
-        <div class="section-columns section-columns--two">
-          <div class="section-block">
-            <h3>Impacto directo en operaciones</h3>
-            <p>
-              Reduce kilómetros recorridos y tiempos improductivos con rutas
-              óptimas calculadas a partir de ciclos hamiltonianos evaluados de
-              forma exhaustiva.
-            </p>
-            <ul class="pill-list">
-              <li class="pill">Menos combustible</li>
-              <li class="pill">Rutas balanceadas</li>
-              <li class="pill">Predicción clara</li>
-            </ul>
+          <div class="actions">
+            <a class="button primary" href="index.html">
+              <svg class="icon" width="16" height="16" aria-hidden="true">
+                <use href="assets/icons.svg#icon-play"></use>
+              </svg>
+              Abrir la app
+            </a>
+            <a class="button outline" href="https://github.com/trinity-bytes/green-circuit">
+              <svg class="icon" width="16" height="16" aria-hidden="true">
+                <use href="assets/icons.svg#icon-github"></use>
+              </svg>
+              Ver código fuente
+            </a>
           </div>
-
-          <div class="section-block">
-            <h3>Experiencia visual integrada</h3>
-            <p>
-              Edita nodos, ajusta pesos de aristas y visualiza el grafo en un
-              entorno interactivo que conserva la trazabilidad de cada decisión.
-            </p>
-            <ul class="pill-list">
-              <li class="pill">Modo edición guiado</li>
-              <li class="pill">Indicadores en tiempo real</li>
-              <li class="pill">Logs pedagógicos</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <!-- FLUJO DE TRABAJO -->
-      <section
-        class="landing-section"
-        id="workflow"
-        style="animation-delay: 0.1s"
-      >
-        <div class="section-heading">
-          <span class="section-icon">
-            <i class="fi fi-rr-route" aria-hidden="true"></i>
-          </span>
-          <h2>Flujo de trabajo paso a paso</h2>
-          <p>
-            Sigue la línea de tiempo para configurar tu escenario, ejecutar el
-            algoritmo y revisar resultados accionables.
-          </p>
-        </div>
-
-        <div class="timeline">
-          <div class="timeline-item">
-            <div class="timeline-number">1</div>
+          <div class="facts">
             <div>
-              <h3>Configura la escala del grafo</h3>
-              <p>
-                Selecciona entre 8 y 16 puntos de recolección. Empieza con 10
-                para validar escenarios rápidamente.
-              </p>
+              <span class="eyebrow">PUNTOS</span>
+              <strong>4–11</strong>
             </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-number">2</div>
             <div>
-              <h3>Genera o personaliza la distribución</h3>
-              <p>
-                Escoge layouts predeterminados (aleatorio, circular, grid) o
-                ajusta nodos manualmente en modo edición.
-              </p>
+              <span class="eyebrow">CICLOS CON N = 8</span>
+              <strong>5 040</strong>
             </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-number">3</div>
             <div>
-              <h3>Define pesos y restricciones</h3>
-              <p>
-                Ajusta los residuos por punto y modifica pesos de las aristas
-                para reflejar distancias o prioridades reales.
-              </p>
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-number">4</div>
-            <div>
-              <h3>Ejecuta el algoritmo TSP</h3>
-              <p>
-                Selecciona la velocidad (rápido, lento o manual) y deja que la
-                aplicación evalúe todos los ciclos hamiltonianos posibles.
-              </p>
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-number">5</div>
-            <div>
-              <h3>Analiza métricas y ruta óptima</h3>
-              <p>
-                Revisa el log estructurado, compara rutas extrema vs. óptima y
-                destaca ahorros potenciales para reportes.
-              </p>
+              <span class="eyebrow">DEPENDENCIAS</span>
+              <strong>Cytoscape.js</strong>
             </div>
           </div>
         </div>
-      </section>
-
-      <!-- RESULTADOS Y BENEFICIOS -->
-      <section
-        class="landing-section"
-        id="results"
-        style="animation-delay: 0.2s"
-      >
-        <div class="section-heading">
-          <span class="section-icon">
-            <i class="fi fi-rr-chart-pie" aria-hidden="true"></i>
-          </span>
-          <h2>Resultados que generan decisiones</h2>
-          <p>
-            El reporte final combina métricas cuantitativas y una visualización
-            clara para presentar el valor de la optimización en minutos.
-          </p>
-        </div>
-
-        <div class="metrics-grid">
-          <div class="metric-card">
-            <h3>Resumen ejecutivo</h3>
-            <p>
-              Destaca el ahorro de distancia, emisiones estimadas y el ciclo
-              óptimo con etiquetas fáciles de comunicar.
-            </p>
+        <div class="graph-panel">
+          <div class="graph-header">
+            <span class="eyebrow">N = 8 · ALEATORIO</span>
+            <span class="graph-caption">
+              <span class="route-swatch" aria-hidden="true"></span>
+              18.16 km · ciclo #2 121 de 5 040
+            </span>
           </div>
-          <div class="metric-card">
-            <h3>Comparativa completa</h3>
-            <p>
-              Contrasta ruta óptima vs. peor escenario para reforzar la toma de
-              decisiones y priorizar recursos.
-            </p>
-          </div>
-          <div class="metric-card">
-            <h3>Log pedagógico</h3>
-            <p>
-              Cada fase queda registrada: construcción de la matriz, evaluación
-              de ciclos y solución del TSP.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <!-- SOBRE EL PROYECTO -->
-      <section class="landing-section" id="about" style="animation-delay: 0.3s">
-        <div class="section-heading">
-          <span class="section-icon">
-            <i class="fi fi-rr-lightbulb-on" aria-hidden="true"></i>
-          </span>
-          <h2>Sobre GreenCircuit</h2>
-        </div>
-        <div class="about-text">
-          <p>
-            GreenCircuit surge como un laboratorio de innovación para mostrar
-            cómo la teoría de grafos, el Problema del Agente Viajero y la
-            visualización interactiva se combinan para resolver desafíos de
-            logística urbana.
-          </p>
-          <p>
-            Cada iteración prioriza la claridad: la aplicación guía al usuario
-            desde la configuración hasta la interpretación de resultados,
-            ofreciendo herramientas de edición y auditoría en un mismo espacio.
-          </p>
-          <p>
-            El objetivo es acelerar decisiones sustentables en municipios y
-            organizaciones, demostrando el impacto tangible de optimizar rutas
-            de recolección.
-          </p>
+          <svg
+            class="graph"
+            viewBox="0 0 520 410"
+            role="img"
+            aria-label="Grafo de ocho puntos con la ruta óptima destacada en verde"
+          >
+            <g class="edges">
+              <path
+                d="M48 367 181 40 385 188 200 289 426 55 474 315 105 180 355 367Z M48 367 385 188 426 55 105 180 200 289 181 40 474 315 355 367 385 188 M48 367 200 289 474 315 M48 367 426 55 M48 367 105 180 M48 367 355 367 M181 40 426 55 M181 40 105 180 M181 40 355 367 M385 188 474 315 M385 188 105 180 M200 289 355 367 M200 289 105 180 M426 55 355 367 M426 55 474 315 M105 180 474 315 M105 180 355 367"
+              />
+            </g>
+            <path
+              class="best"
+              d="M48 367 105 180 181 40 426 55 385 188 474 315 355 367 200 289 48 367"
+            />
+            <g class="nodes">
+              <circle class="start-ring" cx="48" cy="367" r="20" />
+              <circle class="start" cx="48" cy="367" r="16" />
+              <circle cx="181" cy="40" r="16" />
+              <circle cx="385" cy="188" r="16" />
+              <circle cx="200" cy="289" r="16" />
+              <circle cx="426" cy="55" r="16" />
+              <circle cx="474" cy="315" r="16" />
+              <circle cx="105" cy="180" r="16" />
+              <circle cx="355" cy="367" r="16" />
+            </g>
+            <g class="node-labels">
+              <text class="start-label" x="48" y="367">A</text>
+              <text x="181" y="40">B</text>
+              <text x="385" y="188">C</text>
+              <text x="200" y="289">D</text>
+              <text x="426" y="55">E</text>
+              <text x="474" y="315">F</text>
+              <text x="105" y="180">G</text>
+              <text x="355" y="367">H</text>
+            </g>
+          </svg>
         </div>
       </section>
-
-      <!-- CTA FINAL -->
-      <section class="landing-hero" style="padding: var(--spacing-8) 0">
-        <h2
-          style="font-size: var(--font-size-2xl); color: rgba(16, 56, 36, 0.9)"
-        >
-          ¿Listo para optimizar tus rutas hoy?
-        </h2>
-        <a href="index.html" class="cta-button">
-          <span class="cta-icon">
-            <i class="fi fi-rr-rocket" aria-hidden="true"></i>
-          </span>
-          <span>Comenzar Ahora</span>
-        </a>
-      </section>
-
-      <!-- FOOTER -->
-      <footer class="landing-footer">
-        <div class="footer-columns">
-          <div class="footer-brand">
-            <h3>GreenCircuit</h3>
+      <section id="problema" class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow">01 — PROBLEMA</p>
+            <h2>Visitar cada punto una sola vez y volver al origen.</h2>
             <p>
-              Optimización de rutas TSP para operación urbana eficiente y
-              sostenible.
+              Es el problema del agente viajero (TSP) sobre un grafo completo y no dirigido. Los
+              pesos son distancias euclidianas entre puntos del plano.
             </p>
           </div>
-          <div class="footer-nav">
-            <h4 style="margin-bottom: var(--spacing-2)">Secciones</h4>
-            <ul>
-              <li><a href="#vision">Visión general</a></li>
-              <li><a href="#workflow">Flujo de trabajo</a></li>
-              <li><a href="#results">Resultados</a></li>
-              <li><a href="#about">Acerca del proyecto</a></li>
-            </ul>
-          </div>
-          <div class="footer-meta">
-            <h4 style="margin-bottom: var(--spacing-2)">Recursos</h4>
-            <ul>
-              <li><a href="index.html">Abrir Aplicación</a></li>
-              <li><a href="README.md">Documentación</a></li>
-              <li><a href="ROADMAP.md">Roadmap</a></li>
-            </ul>
+          <div class="problem-grid">
+            <article>
+              <p class="eyebrow">NODOS</p>
+              <p class="formula">V = {A, B, …}</p>
+              <p>Puntos de recolección. El primero (A) es el origen.</p>
+            </article>
+            <article>
+              <p class="eyebrow">ARISTAS</p>
+              <p class="formula">w(i, j) = ‖pᵢ − pⱼ‖ · 0.01</p>
+              <p>Distancia en km. Matriz simétrica, diagonal nula.</p>
+            </article>
+            <article>
+              <p class="eyebrow">OBJETIVO</p>
+              <p class="formula">min C(π)</p>
+              <p>π recorre todos los nodos una vez y vuelve a A.</p>
+            </article>
           </div>
         </div>
-        <div class="footer-bottom">
-          <span>© 2025 GreenCircuit. Todos los derechos reservados.</span>
-          <span>Construido con foco en sostenibilidad y datos.</span>
+      </section>
+      <section id="metodo" class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow">02 — MÉTODO</p>
+            <h2>Backtracking sobre todos los ciclos hamiltonianos.</h2>
+            <p>
+              No hay heurísticas: se recorren todas las permutaciones de los nodos restantes y se
+              guarda la de menor costo. Es exacto, y por eso mismo crece factorialmente.
+            </p>
+          </div>
+          <div class="cards phases">
+            <article>
+              <div class="card-top">
+                <span class="eyebrow">FASE 1</span>
+                <span>O(N²)</span>
+              </div>
+              <h3>Matriz de adyacencia</h3>
+              <p>Se precalcula w(i, j) para consultas en O(1).</p>
+            </article>
+            <article>
+              <div class="card-top">
+                <span class="eyebrow">FASE 2</span>
+                <span>O((N−1)!)</span>
+              </div>
+              <h3>Backtracking desde A</h3>
+              <p>
+                Se extiende la ruta con cada nodo no visitado y se retrocede al completar o agotar
+                opciones.
+              </p>
+            </article>
+            <article>
+              <div class="card-top">
+                <span class="eyebrow">FASE 3</span>
+                <span>O(N) por ciclo</span>
+              </div>
+              <h3>Evaluación</h3>
+              <p>Cada ciclo suma sus N aristas; si mejora al óptimo actual, lo reemplaza.</p>
+            </article>
+          </div>
+          <div class="equation">
+            C(π) = w(π₀, π₁) + w(π₁, π₂) + … + w(πₙ₋₁, π₀)
+            <br />
+            π* = argmin C(π), π ∈ permutaciones de {B, …, N} precedidas por A
+            <br />
+            |ciclos| = (N − 1)! · cada recorrido aparece dos veces (y su inverso)
+          </div>
         </div>
-      </footer>
-    </div>
+      </section>
+      <section id="complejidad" class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow">03 — COMPLEJIDAD</p>
+            <h2>El muro factorial.</h2>
+            <p>
+              Cada punto extra multiplica el trabajo por N − 1. Por eso la app limita N a 11: más
+              allá, el navegador tardaría minutos u horas en terminar.
+            </p>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>N</th>
+                  <th>(N − 1)!</th>
+                  <th>ESCALA (LOG₁₀)</th>
+                  <th>TIEMPO ESTIMADO*</th>
+                  <th>ESTADO</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>4</td>
+                  <td>6</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 8.8%" aria-hidden="true"></span>
+                  </td>
+                  <td>&lt; 1 ms</td>
+                  <td>Instantáneo</td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td>120</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 23.1%" aria-hidden="true"></span>
+                  </td>
+                  <td>&lt; 1 ms</td>
+                  <td>Instantáneo</td>
+                </tr>
+                <tr>
+                  <td>8</td>
+                  <td>5 040</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 41.2%" aria-hidden="true"></span>
+                  </td>
+                  <td>~0.05 s</td>
+                  <td>Valor por defecto</td>
+                </tr>
+                <tr>
+                  <td>9</td>
+                  <td>40 320</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 51.2%" aria-hidden="true"></span>
+                  </td>
+                  <td>~0.4 s</td>
+                  <td>Sin aviso</td>
+                </tr>
+                <tr class="warn">
+                  <td>10</td>
+                  <td>362 880</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 61.7%" aria-hidden="true"></span>
+                  </td>
+                  <td>~4 s</td>
+                  <td>Avisa antes de ejecutar</td>
+                </tr>
+                <tr class="warn">
+                  <td>11</td>
+                  <td>3 628 800</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 72.8%" aria-hidden="true"></span>
+                  </td>
+                  <td>~36 s</td>
+                  <td>Límite de la app</td>
+                </tr>
+                <tr>
+                  <td>12</td>
+                  <td>39 916 800</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 84.5%" aria-hidden="true"></span>
+                  </td>
+                  <td>~7 min</td>
+                  <td>Fuera de alcance</td>
+                </tr>
+                <tr>
+                  <td>13</td>
+                  <td>479 001 600</td>
+                  <td>
+                    <span class="scale-bar" style="--bar: 96.5%" aria-hidden="true"></span>
+                  </td>
+                  <td>~1.3 h</td>
+                  <td>Fuera de alcance</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">
+            * Estimación a ~10⁵ ciclos/s. La app mide la tasa real durante la ejecución y actualiza
+            el tiempo restante.
+          </p>
+        </div>
+      </section>
+      <section class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow">04 — MÉTRICAS DERIVADAS</p>
+            <h2>De kilómetros a minutos y emisiones.</h2>
+            <p>
+              Dos supuestos fijos convierten la distancia de la ruta en indicadores operativos. Se
+              muestran junto al resultado, con sus valores reales.
+            </p>
+          </div>
+          <div class="cards metrics">
+            <article>
+              <p class="eyebrow">TIEMPO</p>
+              <p class="formula">t = d / v × 60</p>
+              <p>v = 25 km/h, velocidad media urbana del camión</p>
+              <p class="example">
+                Ej.
+                <span>18.16 km → 43.58 min</span>
+              </p>
+            </article>
+            <article>
+              <p class="eyebrow">EMISIONES</p>
+              <p class="formula">CO₂ = d × e</p>
+              <p>e = 0.2 kg/km, factor de emisión por kilómetro</p>
+              <p class="example">
+                Ej.
+                <span>18.16 km → 3.63 kg</span>
+              </p>
+            </article>
+            <article>
+              <p class="eyebrow">AHORRO</p>
+              <p class="formula">Δ = C(π_peor) − C(π*)</p>
+              <p>Se compara contra la peor ruta encontrada</p>
+              <p class="example">
+                Ej.
+                <span>38.88 − 18.16 = 20.72 km</span>
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section id="arquitectura" class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow">05 — ARQUITECTURA</p>
+            <h2>Módulos pequeños, sin backend.</h2>
+            <p>
+              Todo corre en el navegador con JavaScript sin frameworks. El grafo es la única fuente
+              de verdad; los algoritmos no conocen la interfaz.
+            </p>
+          </div>
+          <div class="flow">
+            <div class="flow-group">
+              <article>
+                <strong>RandomGenerator</strong>
+                <p>Layouts aleatorio, circular y cuadrícula</p>
+              </article>
+              <article>
+                <strong>GraphEditor</strong>
+                <p>Nodos, aristas y pesos a mano</p>
+              </article>
+            </div>
+            <span aria-hidden="true">→</span>
+            <article class="central">
+              <strong>Graph</strong>
+              <p>Nodos, aristas y matriz de adyacencia</p>
+            </article>
+            <span aria-hidden="true">→</span>
+            <article>
+              <strong>HamiltonianFinder</strong>
+              <p>Backtracking desde el origen</p>
+            </article>
+            <span aria-hidden="true">→</span>
+            <article>
+              <strong>TSPSolver</strong>
+              <p>Costo por ciclo, óptimo y peor</p>
+            </article>
+            <span aria-hidden="true">→</span>
+            <div class="flow-group">
+              <article>
+                <strong>CytoscapeRenderer</strong>
+                <p>Dibuja el grafo y la ruta</p>
+              </article>
+              <article>
+                <strong>Trace</strong>
+                <p>Tabla de ejecución y exportación</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="wrap footer">
+      <div>
+        <p>GreenCircuit · 2025 · Licencia MIT</p>
+        <p>
+          Proyecto académico publicado como referencia. Reutilizarlo en entregas calificadas queda
+          bajo tu criterio y las políticas de tu institución.
+        </p>
+      </div>
+      <nav aria-label="Enlaces del pie">
+        <a href="index.html">Abrir la app</a>
+        <a href="https://github.com/trinity-bytes/green-circuit">Código fuente</a>
+        <a href="https://github.com/trinity-bytes/green-circuit#readme">README</a>
+      </nav>
+    </footer>
   </body>
 </html>
